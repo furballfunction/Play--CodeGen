@@ -48,6 +48,10 @@ add_library(CodeGen
 	../src/Jitter_CodeGen_AArch64_64.cpp
 	../src/Jitter_CodeGen_AArch64_Fpu.cpp
 	../src/Jitter_CodeGen_AArch64_Md.cpp
+	../src/Jitter_CodeGen_RV64.cpp
+	../src/Jitter_CodeGen_RV64_64.cpp
+	../src/Jitter_CodeGen_RV64_Fpu.cpp
+	../src/Jitter_CodeGen_RV64_Md.cpp
 	../src/Jitter_CodeGen_x86_32.cpp
 	../src/Jitter_CodeGen_x86_64.cpp
 	../src/Jitter_CodeGen_x86.cpp
@@ -76,6 +80,7 @@ add_library(CodeGen
 	../src/MachoObjectFile.cpp
 	../src/MemoryFunction.cpp
 	../src/ObjectFile.cpp
+	../src/RV64Assembler.cpp
 	../src/WasmModuleBuilder.cpp
 	../src/X86Assembler.cpp
 	../src/X86Assembler_Avx.cpp
@@ -89,6 +94,7 @@ add_library(CodeGen
 	../include/CoffObjectFile.h
 	../include/Jitter_CodeGen_AArch32.h
 	../include/Jitter_CodeGen_AArch64.h
+	../include/Jitter_CodeGen_RV64.h
 	../include/Jitter_CodeGen_Wasm.h
 	../include/Jitter_CodeGen_x86_32.h
 	../include/Jitter_CodeGen_x86_64.h
@@ -106,6 +112,7 @@ add_library(CodeGen
 	../include/MachoObjectFile.h
 	../include/MemoryFunction.h
 	../include/ObjectFile.h
+	../include/RV64Assembler.h
 	../include/WasmDefs.h
 	../include/WasmModuleBuilder.h
 	../include/X86Assembler.h
