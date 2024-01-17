@@ -29,6 +29,8 @@
 		#include "Jitter_CodeGen_AArch32.h"
 	#elif defined(__aarch64__)
 		#include "Jitter_CodeGen_AArch64.h"
+	#elif defined(__riscv)
+		#include "Jitter_CodeGen_RV64.h"
 	#elif defined(__i386__)
 		#include "Jitter_CodeGen_x86_32.h"
 	#elif defined(__x86_64__)
@@ -89,6 +91,8 @@ Jitter::CCodeGen* Jitter::CreateCodeGen()
 		#endif
 	#elif defined(__aarch64__)
 		return new Jitter::CCodeGen_AArch64();
+	#elif defined(__riscv)
+		return new Jitter::CCodeGen_RV64();
 	#elif defined(__i386__)
 		auto codeGen = new Jitter::CCodeGen_x86_32();
 		codeGen->SetImplicitRetValueParamFixUpRequired(true);
