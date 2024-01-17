@@ -123,7 +123,11 @@ CMemoryFunction::CMemoryFunction(const void* code, size_t size)
 		additionalMapFlags = MEMFUNC_MMAP_ADDITIONAL_FLAGS;
 	#endif
 	m_size = size;
+#if defined(__riscv)
+	m_code = mmap(nullptr, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS | additionalMapFlags, -1, 0);
+#else
 	m_code = mmap(nullptr, size, PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS | additionalMapFlags, -1, 0);
+#endif
 	assert(m_code != MAP_FAILED);
 #ifdef MEMFUNC_MMAP_REQUIRES_JIT_WRITE_PROTECT
 	pthread_jit_write_protect_np(false);
