@@ -3679,6 +3679,7 @@ void CRV64Assembler::WriteB(uint32 opcode, uint32 rs1, uint32 rs2, int32 imm)
     opcode |= ((imm & 0x7E0) >> 5) << 25;
     opcode |= (rs1 << 15);
     opcode |= (rs2 << 20);
+    WriteWord(opcode);
 }
 
 /*
