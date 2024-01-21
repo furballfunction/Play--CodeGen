@@ -80,6 +80,11 @@ void CRV64Assembler::ResolveLabelReferences()
         int offset = static_cast<int>(labelPos - labelReference.offset);
 
         m_stream->Seek(labelReference.offset, Framework::STREAM_SEEK_SET);
+        if (uint32 space = m_stream->Read32(); space!=0) {
+            printf("ResolveLabelReferences no space\n");
+            assert(space==0);
+        }
+        m_stream->Seek(labelReference.offset, Framework::STREAM_SEEK_SET);
         if(labelReference.condition == CONDITION_AL)
         {
             /*uint32 opcode = 0x14000000;
@@ -181,6 +186,8 @@ void CRV64Assembler::ResolveLabelReferences()
                     opcode = 0x00004063;
                     // bgeu
                     //opcode = 0x00007063;
+                    signed compares need to be sign extended or shifted 32 left
+                    //WriteWord(0);
                 } else if (labelReference.condition == CRV64Assembler::CONDITION_CS) {
                     // Unsigned CS=1 : src1Reg >= src2Reg
                     // bge
@@ -1539,11 +1546,12 @@ void CRV64Assembler::Ldp_PostIdx(REGISTER64 rt, REGISTER64 rt2, REGISTER64 rn, i
         assert(scaledOffset >= -64 && scaledOffset <= 63);
 
         scaledOffset = 0;
-        uint32 opcode = 0x00003003;
+        /*uint32 opcode = 0x00003003;
         opcode |= (rt  <<  7);
         opcode |= (rn  <<  15);
         opcode |= (scaledOffset << 20);
-        WriteWord(opcode);
+        WriteWord(opcode);*/
+        Ld(rt, rn, scaledOffset);
     }
     {
         //int32 scaledOffset = offset / 8;
@@ -1551,15 +1559,16 @@ void CRV64Assembler::Ldp_PostIdx(REGISTER64 rt, REGISTER64 rt2, REGISTER64 rn, i
         assert(scaledOffset >= -64 && scaledOffset <= 63);
 
         scaledOffset = 8;
-        uint32 opcode = 0x00003003;
+        /*uint32 opcode = 0x00003003;
         opcode |= (rt2 <<  7);
         opcode |= (rn  <<  15);
         opcode |= (scaledOffset << 20);
-        WriteWord(opcode);
+        WriteWord(opcode);*/
+        Ld(rt2, rn, scaledOffset);
 
         scaledOffset = offset;
         //add rn, rn, scaledOffset
-        opcode = 0x00000013;
+        uint32 opcode = 0x00000013;
         opcode |= (rn  <<  7);
         opcode |= (rn  <<  15);
         opcode |= (scaledOffset << 20);
@@ -2450,6 +2459,26 @@ void CRV64Assembler::Smull(REGISTER64 rd, REGISTER32 rn, REGISTER32 rm) {
     WriteWord(opcode);
 }
 
+void CRV64Assembler::Smull(REGISTER64 rd, REGISTER32 rn, REGISTER32 rm, REGISTER64 rt1, REGISTER64 rt2) {
+    Addiw(static_cast<REGISTER32>(rt1), rn, 0);
+    Addiw(static_cast<REGISTER32>(rt2), rm, 0);
+
+    // mul
+    uint32 opcode = 0x02000033;
+    // mulw
+    //uint32 opcode = 0x0200003B;
+    // mulh
+    //uint32 opcode = 0x02001033;
+    // mulhsu
+    //uint32 opcode = 0x02002033;
+    // mulhu
+    //uint32 opcode = 0x02003033;
+    opcode |= (rd  <<  7);
+    opcode |= (rt1 << 15);
+    opcode |= (rt2 << 20);
+    WriteWord(opcode);
+}
+
 void CRV64Assembler::Sshr_4s_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, uint8 shmt, REGISTER32 tmp1Reg) {
     for (int i=0; i<16; i+=4) {
         Ldr(tmp1Reg, src1AddrReg, i);
@@ -3026,6 +3055,24 @@ void CRV64Assembler::Umov_1s(REGISTER32 rd, REGISTERMD rn, uint8 index)
     WriteWord(opcode);
 }
 
+void CRV64Assembler::Umull(REGISTER64 rd, REGISTER32 rn, REGISTER32 rm)
+{
+    // mul
+    uint32 opcode = 0x02000033;
+    // mulw
+    //uint32 opcode = 0x0200003B;
+    // mulh
+    //uint32 opcode = 0x02001033;
+    // mulhsu
+    //uint32 opcode = 0x02002033;
+    // mulhu
+    //uint32 opcode = 0x02003033;
+    opcode |= (rd  <<  7);
+    opcode |= (rn  << 15);
+    opcode |= (rm  << 20);
+    WriteWord(opcode);
+}
+
 void CRV64Assembler::Umull(REGISTER64 rd, REGISTER32 rn, REGISTER32 rm, REGISTER64 rt1, REGISTER64 rt2)
 {
     {
@@ -3044,20 +3091,20 @@ void CRV64Assembler::Umull(REGISTER64 rd, REGISTER32 rn, REGISTER32 rm, REGISTER
     }
 
     Lsl(rt1, rt1, 32);
-    Lsr(rt1, rt1, 32);
+    //Lsr(rt1, rt1, 32);
     Lsl(rt2, rt2, 32);
-    Lsr(rt2, rt2, 32);
+    //Lsr(rt2, rt2, 32);
 
-    // mov
-    uint32 opcode = 0x02000033;
-    // movw
+    // mul
+    //uint32 opcode = 0x02000033;
+    // mulw
     //uint32 opcode = 0x0200003B;
-    // movh
+    // mulh
     //uint32 opcode = 0x02001033;
-    // movhsu
+    // mulhsu
     //uint32 opcode = 0x02002033;
-    // movhu
-    //uint32 opcode = 0x02003033;
+    // mulhu
+    uint32 opcode = 0x02003033;
     opcode |= (rd  <<  7);
     opcode |= (rt1  << 15);
     opcode |= (rt2  << 20);
@@ -3264,6 +3311,14 @@ void CRV64Assembler::Zip2_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 /*
  * Pseudo Instructions
  */
+
+void CRV64Assembler::Lwu(REGISTER32 rd, REGISTER64 rs1, int32 imm) {
+    Lwu(static_cast<REGISTER64>(rd), rs1, imm);
+}
+
+void CRV64Assembler::Lw(REGISTER32 rd, REGISTER64 rs1, int32 imm) {
+    Lw(static_cast<REGISTER64>(rd), rs1, imm);
+}
 
 void CRV64Assembler::Xorw(REGISTER32 rd, REGISTER32 rs1, REGISTER32 rs2) {
     Xor(static_cast<REGISTER64>(rd), static_cast<REGISTER64>(rs1), static_cast<REGISTER64>(rs2));
@@ -3480,6 +3535,9 @@ void CRV64Assembler::Addi(REGISTER64 rd, REGISTER64 rs1, int16 imm)
 // RV64I
 void CRV64Assembler::Addiw(REGISTER32 rd, REGISTER32 rs1, int16 imm)
 {
+    if (rs1==0 && imm==0) {
+        printf("sext.w %d\n", rd);
+    }
     WriteI(0x0000001B, rd, rs1, imm);
 }
 

@@ -274,6 +274,7 @@ public:
     void    Smin_8h_Mem(REGISTER64, REGISTER64, REGISTER64, REGISTER32, REGISTER32);
 
     void    Smull(REGISTER64, REGISTER32, REGISTER32);
+    void    Smull(REGISTER64, REGISTER32, REGISTER32, REGISTER64, REGISTER64);
 
     void    Sshr_4s(REGISTERMD, REGISTERMD, uint8);
     void    Sshr_8h(REGISTERMD, REGISTERMD, uint8);
@@ -325,6 +326,7 @@ public:
     void    Udiv(REGISTER32, REGISTER32, REGISTER32);
     void    Umin_4s(REGISTERMD, REGISTERMD, REGISTERMD);
     void    Umov_1s(REGISTER32, REGISTERMD, uint8);
+    void    Umull(REGISTER64, REGISTER32, REGISTER32);
     void    Umull(REGISTER64, REGISTER32, REGISTER32, REGISTER64, REGISTER64);
 
     void    Uqadd_4s(REGISTERMD, REGISTERMD, REGISTERMD);
@@ -360,6 +362,8 @@ public:
     void    Zip2_8h(REGISTERMD, REGISTERMD, REGISTERMD);
     void    Zip2_16b(REGISTERMD, REGISTERMD, REGISTERMD);
 
+    void    Lwu(REGISTER32 rd, REGISTER64 rs1, int32 imm);
+    void    Lw(REGISTER32 rd, REGISTER64 rs1, int32 imm);
     void    Xorw(REGISTER32 rd, REGISTER32 rs1, REGISTER32 rs2);
     void    Orw(REGISTER32 rd, REGISTER32 rs1, REGISTER32 rs2);
     void    Andw(REGISTER32 rd, REGISTER32 rs1, REGISTER32 rs2);
@@ -461,6 +465,7 @@ private:
     void    WriteLogicalOpImm(uint32 opcode, uint32 shamt, uint32 rn, uint32 rd);
     void    WriteLoadStoreOpImm(uint32, uint32 imm, uint32 rn, uint32 rt);
     void    WriteMoveWideOpImm(uint32, uint32 hw, uint32 imm, uint32 rd);
+public:
     void    WriteWord(uint32);
 private:
 

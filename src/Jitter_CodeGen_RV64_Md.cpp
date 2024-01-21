@@ -123,7 +123,7 @@ void CCodeGen_RV64::Emit_Md_MemMem1S(const STATEMENT& statement)
     auto src1Reg = GetNextTempRegisterMd();
 
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Fmv_1s(src1Reg, tmpReg);
         ((m_assembler).*(MDOP::OpReg()))(dstReg, src1Reg);
         m_assembler.Str_1s(dstReg, dstAddrReg, i);
@@ -153,7 +153,7 @@ void CCodeGen_RV64::Emit_Md_MemMemIR1S(const STATEMENT& statement)
     auto src1Reg = GetNextTempRegisterMd();
 
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Fmv_1s(src1Reg, tmpReg);
         ((m_assembler).*(MDOP::OpReg()))(dstReg, src1Reg);
         m_assembler.Str(dstReg, dstAddrReg, i);
@@ -182,7 +182,7 @@ void CCodeGen_RV64::Emit_Md_MemMemSR1I(const STATEMENT& statement)
     auto src1Reg = GetNextTempRegister();
 
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(src1Reg, src1AddrReg, i);
+        m_assembler.Lw(src1Reg, src1AddrReg, i);
         ((m_assembler).*(MDOP::OpReg()))(dstReg, src1Reg);
         m_assembler.Str_1s(dstReg, dstAddrReg, i);
     }
@@ -242,9 +242,9 @@ void CCodeGen_RV64::Emit_Md_MemMemMem1S(const STATEMENT& statement)
     auto src2Reg = GetNextTempRegisterMd();
 
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Fmv_1s(src1Reg, tmpReg);
-        m_assembler.Ldr(tmpReg, src2AddrReg, i);
+        m_assembler.Lw(tmpReg, src2AddrReg, i);
         m_assembler.Fmv_1s(src2Reg, tmpReg);
         ((m_assembler).*(MDOP::OpReg()))(dstReg, src1Reg, src2Reg);
         m_assembler.Str_1s(dstReg, dstAddrReg, i);
@@ -272,9 +272,9 @@ void CCodeGen_RV64::Emit_Md_MemMemMemIR1S(const STATEMENT& statement)
     auto src2Reg = GetNextTempRegisterMd();
 
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Fmv_1s(src1Reg, tmpReg);
-        m_assembler.Ldr(tmpReg, src2AddrReg, i);
+        m_assembler.Lw(tmpReg, src2AddrReg, i);
         m_assembler.Fmv_1s(src2Reg, tmpReg);
         ((m_assembler).*(MDOP::OpReg()))(dstReg, src1Reg, src2Reg);
         m_assembler.Str(dstReg, dstAddrReg, i);
@@ -330,9 +330,9 @@ void CCodeGen_RV64::Emit_Md_MemMemMemRev1S(const STATEMENT& statement)
     auto src2Reg = GetNextTempRegisterMd();
 
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Fmv_1s(src1Reg, tmpReg);
-        m_assembler.Ldr(tmpReg, src2AddrReg, i);
+        m_assembler.Lw(tmpReg, src2AddrReg, i);
         m_assembler.Fmv_1s(src2Reg, tmpReg);
         ((m_assembler).*(MDOP::OpReg()))(dstReg, src2Reg, src1Reg);
         m_assembler.Str_1s(dstReg, dstAddrReg, i);
@@ -360,9 +360,9 @@ void CCodeGen_RV64::Emit_Md_MemMemMemRevIR1S(const STATEMENT& statement)
     auto src2Reg = GetNextTempRegisterMd();
 
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Fmv_1s(src1Reg, tmpReg);
-        m_assembler.Ldr(tmpReg, src2AddrReg, i);
+        m_assembler.Lw(tmpReg, src2AddrReg, i);
         m_assembler.Fmv_1s(src2Reg, tmpReg);
         ((m_assembler).*(MDOP::OpReg()))(dstReg, src2Reg, src1Reg);
         m_assembler.Str(dstReg, dstAddrReg, i);
@@ -414,7 +414,7 @@ void CCodeGen_RV64::Emit_Md_Mov_MemMem(const STATEMENT& statement)
     //m_assembler.Vst1_32x4(tmpReg, dstAddrReg);
 
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Str(tmpReg, dstAddrReg, i);
     }
 }
@@ -439,9 +439,9 @@ void CCodeGen_RV64::Emit_Md_DivS_MemMemMem(const STATEMENT& statement)
     auto src2Reg = GetNextTempRegisterMd();
 
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Fmv_1s(src1Reg, tmpReg);
-        m_assembler.Ldr(tmpReg, src2AddrReg, i);
+        m_assembler.Lw(tmpReg, src2AddrReg, i);
         m_assembler.Fmv_1s(src2Reg, tmpReg);
         m_assembler.Fdiv_1s(dstReg, src1Reg, src2Reg);
         m_assembler.Str_1s(dstReg, dstAddrReg, i);
@@ -473,7 +473,7 @@ void CCodeGen_RV64::Emit_Md_Srl256_MemMemCst(const STATEMENT& statement)
 
     auto tmpReg = GetNextTempRegister();
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Str(tmpReg, dstAddrReg, i);
     }
 }
@@ -518,7 +518,7 @@ void CCodeGen_RV64::Emit_Md_Srl256_MemMemVar(const STATEMENT& statement)
     //m_assembler.Vst1_32x4(dstReg, dstAddrReg);
 
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Str(tmpReg, dstAddrReg, i);
     }
 }
@@ -542,7 +542,7 @@ void CCodeGen_RV64::Emit_Md_LoadFromRef_MemVar(const STATEMENT& statement)
 
     auto tmpReg = GetNextTempRegister();
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Str(tmpReg, dstAddrReg, i);
     }
 }
@@ -592,7 +592,7 @@ void CCodeGen_RV64::Emit_Md_LoadFromRef_MemVarAny(const STATEMENT& statement)
 
     auto tmpReg = GetNextTempRegister();
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrIdxReg, i);
+        m_assembler.Lw(tmpReg, src1AddrIdxReg, i);
         m_assembler.Str(tmpReg, dstAddrReg, i);
     }
 }
@@ -616,7 +616,7 @@ void CCodeGen_RV64::Emit_Md_StoreAtRef_VarMem(const STATEMENT& statement)
 
     auto tmpReg = GetNextTempRegister();
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src2AddrReg, i);
+        m_assembler.Lw(tmpReg, src2AddrReg, i);
         m_assembler.Str(tmpReg, src1AddrReg, i);
     }
 }
@@ -645,7 +645,7 @@ void CCodeGen_RV64::Emit_Md_StoreAtRef_VarAnyMem(const STATEMENT& statement)
 
     auto tmpReg = GetNextTempRegister();
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, valueAddrReg, i);
+        m_assembler.Lw(tmpReg, valueAddrReg, i);
         m_assembler.Str(tmpReg, src1AddrIdxReg, i);
     }
 }
@@ -692,7 +692,7 @@ void CCodeGen_RV64::Emit_Md_MovMasked_MemMemMem(const STATEMENT& statement)
     {
         if(mask & (1 << i))
         {
-            m_assembler.Ldr(tmpReg, src2AddrReg, i*4);
+            m_assembler.Lw(tmpReg, src2AddrReg, i*4);
             m_assembler.Str(tmpReg, dstAddrReg, i*4);
         }
     }
@@ -808,7 +808,7 @@ void CCodeGen_RV64::Emit_Md_ClampS_MemMem(const STATEMENT& statement)
     //m_assembler.Vst1_32x4(dstReg, dstAddrReg);
 
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Smin_1s(tmpReg, tmpReg, cst1Reg);
         m_assembler.Umin_1s(tmpReg, tmpReg, cst2Reg);
         m_assembler.Str(tmpReg, dstAddrReg, i);
@@ -866,7 +866,7 @@ void CCodeGen_RV64::Emit_Md_MakeSz_VarMem(const STATEMENT& statement)
     for (int i=4; i-->0; )
     {
         //m_assembler.Mov(signReg, oneReg);
-        m_assembler.Ldr(tmpReg, src1AddrReg, i*4);
+        m_assembler.Lwu(tmpReg, src1AddrReg, i*4);
 
         m_assembler.Andw(signReg, tmpReg, signBitReg);
 
@@ -1196,9 +1196,9 @@ void CCodeGen_RV64::Emit_Md_UnpackWD_MemMemMem(const STATEMENT& statement)
     auto tmpReg = GetNextTempRegister();
     for (int i=0; i<2; i++)
     {
-        m_assembler.Ldr(tmpReg, src2AddrReg, i*4);
+        m_assembler.Lwu(tmpReg, src2AddrReg, i*4);
         m_assembler.Str(tmpReg, dstAddrReg, i*8);
-        m_assembler.Ldr(tmpReg, src1AddrReg, i*4);
+        m_assembler.Lwu(tmpReg, src1AddrReg, i*4);
         m_assembler.Str(tmpReg, dstAddrReg, (i*8)+4);
     }
 }
@@ -1236,11 +1236,11 @@ void CCodeGen_RV64::Emit_MergeTo256_MemMemMem(const STATEMENT& statement)
 
     auto tmpReg = GetNextTempRegister();
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src1AddrReg, i);
+        m_assembler.Lwu(tmpReg, src1AddrReg, i);
         m_assembler.Str(tmpReg, dstLoAddrReg, i);
     }
     for (int i=0; i<16; i+=4) {
-        m_assembler.Ldr(tmpReg, src2AddrReg, i);
+        m_assembler.Lwu(tmpReg, src2AddrReg, i);
         m_assembler.Str(tmpReg, dstHiAddrReg, i);
     }
 }

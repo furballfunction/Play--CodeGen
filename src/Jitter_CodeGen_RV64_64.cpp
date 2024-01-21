@@ -25,11 +25,11 @@ void CCodeGen_RV64::LoadMemory64InRegister(CRV64Assembler::REGISTER64 registerId
     {
     case SYM_RELATIVE64:
         assert((src->m_valueLow & 0x07) == 0x00);
-        m_assembler.Ldr(registerId, g_baseRegister, src->m_valueLow);
+        m_assembler.Ld(registerId, g_baseRegister, src->m_valueLow);
         break;
     case SYM_TEMPORARY64:
         assert((src->m_stackLocation & 0x07) == 0x00);
-        m_assembler.Ldr(registerId, CRV64Assembler::xSP, src->m_stackLocation);
+        m_assembler.Ld(registerId, CRV64Assembler::xSP, src->m_stackLocation);
         break;
     default:
         assert(0);
@@ -95,10 +95,10 @@ void CCodeGen_RV64::LoadMemory64LowInRegister(CRV64Assembler::REGISTER32 registe
     switch(symbol->m_type)
     {
     case SYM_RELATIVE64:
-        m_assembler.Ldr(registerId, g_baseRegister, symbol->m_valueLow + 0);
+        m_assembler.Lwu(registerId, g_baseRegister, symbol->m_valueLow + 0);
         break;
     case SYM_TEMPORARY64:
-        m_assembler.Ldr(registerId, CRV64Assembler::xSP, symbol->m_stackLocation + 0);
+        m_assembler.Lwu(registerId, CRV64Assembler::xSP, symbol->m_stackLocation + 0);
         break;
     default:
         assert(false);
@@ -111,10 +111,10 @@ void CCodeGen_RV64::LoadMemory64HighInRegister(CRV64Assembler::REGISTER32 regist
     switch(symbol->m_type)
     {
     case SYM_RELATIVE64:
-        m_assembler.Ldr(registerId, g_baseRegister, symbol->m_valueLow + 4);
+        m_assembler.Lwu(registerId, g_baseRegister, symbol->m_valueLow + 4);
         break;
     case SYM_TEMPORARY64:
-        m_assembler.Ldr(registerId, CRV64Assembler::xSP, symbol->m_stackLocation + 4);
+        m_assembler.Lwu(registerId, CRV64Assembler::xSP, symbol->m_stackLocation + 4);
         break;
     default:
         assert(false);
@@ -215,7 +215,7 @@ void CCodeGen_RV64::Emit_LoadFromRef_64_MemVar(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto dstReg = GetNextTempRegister64();
 
-    m_assembler.Ldr(dstReg, addressReg, 0);
+    m_assembler.Ld(dstReg, addressReg, 0);
 
     StoreRegisterInMemory64(dst, dstReg);
 }
@@ -234,7 +234,7 @@ void CCodeGen_RV64::Emit_LoadFromRef_64_MemVarAny(const STATEMENT& statement)
 
     if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex < 0x8000))
     {
-        m_assembler.Ldr(dstReg, addressReg, scaledIndex);
+        m_assembler.Ld(dstReg, addressReg, scaledIndex);
     }
     else
     {

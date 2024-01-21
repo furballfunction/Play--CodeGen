@@ -197,7 +197,7 @@ void CCodeGen_RV64::Emit_Fp_Mov_MemSRelI32(const STATEMENT& statement)
     //m_assembler.Ldr_1s(src1Reg, g_baseRegister, src1->m_valueLow);
     //m_assembler.Scvtf_1s(dstReg, src1Reg);
 
-    m_assembler.Ldr(src1Reg, g_baseRegister, src1->m_valueLow);
+    m_assembler.Lw(src1Reg, g_baseRegister, src1->m_valueLow);
     m_assembler.Fcvtsw_1s(dstReg, src1Reg);
 
     StoreRegisterInMemoryFpSingle(dst, dstReg);

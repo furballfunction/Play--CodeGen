@@ -248,18 +248,22 @@ void CCodeGen_RV64::Emit_Mul_Tmp64AnyAny(const STATEMENT& statement)
 
     if(isSigned)
     {
-        m_assembler.Smull(dstReg, src1Reg, src2Reg);
+        //m_assembler.Smull(dstReg, src1Reg, src2Reg);
         //m_assembler.Smull(resLoReg, src1Reg, src2Reg, resHiReg);
         //m_assembler.Smull(dstReg, src1Reg, src2Reg, CRV64Assembler::xZR);
+        auto resTmp1 = GetNextTempRegister64();
+        auto resTmp2 = GetNextTempRegister64();
+        m_assembler.Smull(dstReg, src1Reg, src2Reg, resTmp1, resTmp2);
     }
     else
     {
-        auto resTmp1 = GetNextTempRegister64();
-        auto resTmp2 = GetNextTempRegister64();
+        //auto resTmp1 = GetNextTempRegister64();
+        //auto resTmp2 = GetNextTempRegister64();
         //m_assembler.Umull(dstReg, src1Reg, src2Reg);
         //m_assembler.Umull(resLoReg, src1Reg, src2Reg, resHiReg);
         //m_assembler.Umull(dstReg, src1Reg, src2Reg, CRV64Assembler::xZR);
-        m_assembler.Umull(dstReg, src1Reg, src2Reg, resTmp1, resTmp2);
+        //m_assembler.Umull(dstReg, src1Reg, src2Reg, resTmp1, resTmp2);
+        m_assembler.Umull(dstReg, src1Reg, src2Reg);
     }
 
     //m_assembler.Mov(dstReg, resLoReg);
@@ -598,10 +602,10 @@ void CCodeGen_RV64::LoadMemoryInRegister(CRV64Assembler::REGISTER32 registerId, 
     case SYM_RELATIVE:
         //assert(0);
         assert((src->m_valueLow & 0x03) == 0x00);
-        m_assembler.Ldr(registerId, g_baseRegister, src->m_valueLow);
+        m_assembler.Lwu(registerId, g_baseRegister, src->m_valueLow);
         break;
     case SYM_TEMPORARY:
-        m_assembler.Ldr(registerId, CRV64Assembler::xSP, src->m_stackLocation);
+        m_assembler.Lwu(registerId, CRV64Assembler::xSP, src->m_stackLocation);
         break;
     default:
         assert(0);
@@ -664,9 +668,10 @@ void CCodeGen_RV64::LoadMemoryReferenceInRegister(CRV64Assembler::REGISTER64 reg
         m_assembler.Li(tmpReg, src->m_valueLow);
         m_assembler.Ldr(registerId, g_baseRegister, tmpReg, false);
         //m_assembler.Ldr(registerId, g_baseRegister, src->m_valueLow);
+        //m_assembler.Ld(registerId, g_baseRegister, src->m_valueLow);
         break;
     case SYM_TMP_REFERENCE:
-        m_assembler.Ldr(registerId, CRV64Assembler::xSP, src->m_stackLocation);
+        m_assembler.Ld(registerId, CRV64Assembler::xSP, src->m_stackLocation);
         break;
     default:
         assert(false);
@@ -1271,7 +1276,7 @@ void CCodeGen_RV64::Emit_LoadFromRef_VarVar(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto dstReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
 
-    m_assembler.Ldr(dstReg, addressReg, 0);
+    m_assembler.Lwu(dstReg, addressReg, 0);
 
     CommitSymbolRegister(dst, dstReg);
 }
@@ -1311,7 +1316,7 @@ void CCodeGen_RV64::Emit_LoadFromRef_Ref_VarVar(const STATEMENT& statement)
     auto dstReg = PrepareSymbolRegisterDefRef(dst, GetNextTempRegister64());
     auto src1Reg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
 
-    m_assembler.Ldr(dstReg, src1Reg, 0);
+    m_assembler.Ld(dstReg, src1Reg, 0);
 
     CommitSymbolRegisterRef(dst, dstReg);
 }
