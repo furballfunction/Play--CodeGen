@@ -95,10 +95,10 @@ void CCodeGen_RV64::LoadMemory64LowInRegister(CRV64Assembler::REGISTER32 registe
     switch(symbol->m_type)
     {
     case SYM_RELATIVE64:
-        m_assembler.Lwu(registerId, g_baseRegister, symbol->m_valueLow + 0);
+        m_assembler.Lw(registerId, g_baseRegister, symbol->m_valueLow + 0);
         break;
     case SYM_TEMPORARY64:
-        m_assembler.Lwu(registerId, CRV64Assembler::xSP, symbol->m_stackLocation + 0);
+        m_assembler.Lw(registerId, CRV64Assembler::xSP, symbol->m_stackLocation + 0);
         break;
     default:
         assert(false);
@@ -111,10 +111,10 @@ void CCodeGen_RV64::LoadMemory64HighInRegister(CRV64Assembler::REGISTER32 regist
     switch(symbol->m_type)
     {
     case SYM_RELATIVE64:
-        m_assembler.Lwu(registerId, g_baseRegister, symbol->m_valueLow + 4);
+        m_assembler.Lw(registerId, g_baseRegister, symbol->m_valueLow + 4);
         break;
     case SYM_TEMPORARY64:
-        m_assembler.Lwu(registerId, CRV64Assembler::xSP, symbol->m_stackLocation + 4);
+        m_assembler.Lw(registerId, CRV64Assembler::xSP, symbol->m_stackLocation + 4);
         break;
     default:
         assert(false);

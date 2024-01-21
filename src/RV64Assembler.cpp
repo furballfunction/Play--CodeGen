@@ -186,8 +186,6 @@ void CRV64Assembler::ResolveLabelReferences()
                     opcode = 0x00004063;
                     // bgeu
                     //opcode = 0x00007063;
-                    signed compares need to be sign extended or shifted 32 left
-                    //WriteWord(0);
                 } else if (labelReference.condition == CRV64Assembler::CONDITION_CS) {
                     // Unsigned CS=1 : src1Reg >= src2Reg
                     // bge
@@ -3075,24 +3073,9 @@ void CRV64Assembler::Umull(REGISTER64 rd, REGISTER32 rn, REGISTER32 rm)
 
 void CRV64Assembler::Umull(REGISTER64 rd, REGISTER32 rn, REGISTER32 rm, REGISTER64 rt1, REGISTER64 rt2)
 {
-    {
-    uint32 opcode = 0x00000033;
-    opcode |= (rt1 <<  7);
-    opcode |= (rn << 15);
-    opcode |= (0 << 20);
-    WriteWord(opcode);
-    }
-    {
-    uint32 opcode = 0x00000033;
-    opcode |= (rt2 <<  7);
-    opcode |= (rm << 15);
-    opcode |= (0 << 20);
-    WriteWord(opcode);
-    }
-
-    Lsl(rt1, rt1, 32);
+    Lsl(rt1, static_cast<REGISTER64>(rn), 32);
     //Lsr(rt1, rt1, 32);
-    Lsl(rt2, rt2, 32);
+    Lsl(rt2, static_cast<REGISTER64>(rm), 32);
     //Lsr(rt2, rt2, 32);
 
     // mul
@@ -3535,9 +3518,6 @@ void CRV64Assembler::Addi(REGISTER64 rd, REGISTER64 rs1, int16 imm)
 // RV64I
 void CRV64Assembler::Addiw(REGISTER32 rd, REGISTER32 rs1, int16 imm)
 {
-    if (rs1==0 && imm==0) {
-        printf("sext.w %d\n", rd);
-    }
     WriteI(0x0000001B, rd, rs1, imm);
 }
 

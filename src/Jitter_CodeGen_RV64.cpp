@@ -248,22 +248,22 @@ void CCodeGen_RV64::Emit_Mul_Tmp64AnyAny(const STATEMENT& statement)
 
     if(isSigned)
     {
-        //m_assembler.Smull(dstReg, src1Reg, src2Reg);
+        m_assembler.Smull(dstReg, src1Reg, src2Reg);
         //m_assembler.Smull(resLoReg, src1Reg, src2Reg, resHiReg);
         //m_assembler.Smull(dstReg, src1Reg, src2Reg, CRV64Assembler::xZR);
-        auto resTmp1 = GetNextTempRegister64();
-        auto resTmp2 = GetNextTempRegister64();
-        m_assembler.Smull(dstReg, src1Reg, src2Reg, resTmp1, resTmp2);
+        //auto resTmp1 = GetNextTempRegister64();
+        //auto resTmp2 = GetNextTempRegister64();
+        //m_assembler.Smull(dstReg, src1Reg, src2Reg, resTmp1, resTmp2);
     }
     else
     {
-        //auto resTmp1 = GetNextTempRegister64();
-        //auto resTmp2 = GetNextTempRegister64();
+        auto resTmp1 = GetNextTempRegister64();
+        auto resTmp2 = GetNextTempRegister64();
         //m_assembler.Umull(dstReg, src1Reg, src2Reg);
         //m_assembler.Umull(resLoReg, src1Reg, src2Reg, resHiReg);
         //m_assembler.Umull(dstReg, src1Reg, src2Reg, CRV64Assembler::xZR);
-        //m_assembler.Umull(dstReg, src1Reg, src2Reg, resTmp1, resTmp2);
-        m_assembler.Umull(dstReg, src1Reg, src2Reg);
+        m_assembler.Umull(dstReg, src1Reg, src2Reg, resTmp1, resTmp2);
+        //m_assembler.Umull(dstReg, src1Reg, src2Reg);
     }
 
     //m_assembler.Mov(dstReg, resLoReg);
@@ -602,10 +602,10 @@ void CCodeGen_RV64::LoadMemoryInRegister(CRV64Assembler::REGISTER32 registerId, 
     case SYM_RELATIVE:
         //assert(0);
         assert((src->m_valueLow & 0x03) == 0x00);
-        m_assembler.Lwu(registerId, g_baseRegister, src->m_valueLow);
+        m_assembler.Lw(registerId, g_baseRegister, src->m_valueLow);
         break;
     case SYM_TEMPORARY:
-        m_assembler.Lwu(registerId, CRV64Assembler::xSP, src->m_stackLocation);
+        m_assembler.Lw(registerId, CRV64Assembler::xSP, src->m_stackLocation);
         break;
     default:
         assert(0);
@@ -1276,7 +1276,7 @@ void CCodeGen_RV64::Emit_LoadFromRef_VarVar(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto dstReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
 
-    m_assembler.Lwu(dstReg, addressReg, 0);
+    m_assembler.Lw(dstReg, addressReg, 0);
 
     CommitSymbolRegister(dst, dstReg);
 }
