@@ -219,13 +219,14 @@ void CCodeGen_RV64::Emit_Logic_VarVarCst(const STATEMENT& statement)
     auto dstReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
     auto src1Reg = PrepareSymbolRegisterUse(src1, GetNextTempRegister());
 
-    /*LOGICAL_IMM_PARAMS logicalImmParams;
+    LOGICAL_IMM_PARAMS logicalImmParams;
     if(TryGetLogicalImmParams(src2->m_valueLow, logicalImmParams))
     {
-        ((m_assembler).*(LogicOp::OpImm()))(dstReg, src1Reg,
-            logicalImmParams.n, logicalImmParams.immr, logicalImmParams.imms);
+        /*((m_assembler).*(LogicOp::OpImm()))(dstReg, src1Reg,
+            logicalImmParams.n, logicalImmParams.immr, logicalImmParams.imms);*/
+        ((m_assembler).*(LogicOp::OpImm()))(dstReg, src1Reg, logicalImmParams.imm);
     }
-    else*/
+    else
     {
         auto src2Reg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
         ((m_assembler).*(LogicOp::OpReg()))(dstReg, src1Reg, src2Reg);
@@ -665,10 +666,17 @@ void CCodeGen_RV64::LoadMemoryReferenceInRegister(CRV64Assembler::REGISTER64 reg
     case SYM_REL_REFERENCE:
         //assert(0);
         assert((src->m_valueLow & 0x07) == 0x00);
-        m_assembler.Li(tmpReg, src->m_valueLow);
-        m_assembler.Ldr(registerId, g_baseRegister, tmpReg, false);
+        /*m_assembler.Li(tmpReg, src->m_valueLow);
+        m_assembler.Ldr(registerId, g_baseRegister, tmpReg, false);*/
         //m_assembler.Ldr(registerId, g_baseRegister, src->m_valueLow);
         //m_assembler.Ld(registerId, g_baseRegister, src->m_valueLow);
+        if ((src->m_valueLow >= -2048) && (src->m_valueLow <= 2047)) {
+            m_assembler.Ld(registerId, g_baseRegister, src->m_valueLow);
+        } else {
+            m_assembler.Li(tmpReg, src->m_valueLow);
+            m_assembler.Add(tmpReg, tmpReg, g_baseRegister);
+            m_assembler.Ld(registerId, tmpReg, 0);
+        }
         break;
     case SYM_TMP_REFERENCE:
         m_assembler.Ld(registerId, CRV64Assembler::xSP, src->m_stackLocation);
@@ -880,58 +888,11 @@ bool CCodeGen_RV64::TryGetAddSub64ImmParams(uint64 imm, ADDSUB_IMM_PARAMS& param
 
 bool CCodeGen_RV64::TryGetLogicalImmParams(uint32 imm, LOGICAL_IMM_PARAMS& params)
 {
-    //Algorithm from LLVM, 'processLogicalImmediate' function
-
-    if((imm == 0) || (imm == ~0))
-    {
-        return false;
+    if ((imm & 0x1f) == imm) {
+        params.imm = static_cast<uint16>(imm);
+        return true;
     }
-
-    int size = 32;
-    while(true)
-    {
-        size /= 2;
-        uint32 mask = (1 << size) - 1;
-        if((imm & mask) != ((imm >> size) & mask))
-        {
-            size *= 2;
-            break;
-        }
-        if(size > 2) break;
-    }
-
-    uint32 cto = 0, i = 0;
-    uint32 mask = (~0) >> (32 - size);
-    imm &= mask;
-
-    if(isShiftedMask(imm))
-    {
-        i = __builtin_ctz(imm);
-        cto = __builtin_ctz(~(imm >> i));
-    }
-    else
-    {
-        imm |= ~mask;
-        if(!isShiftedMask(~imm))
-        {
-            return false;
-        }
-        uint32 clo = __builtin_clz(~imm);
-        i = 32 - clo;
-        cto = clo + __builtin_ctz(~imm) - (32 - size);
-    }
-
-    assert(size > i);
-    params.immr = (size - i) & (size - 1);
-
-    uint32 nimms = ~(size - 1) << 1;
-    nimms |= (cto - 1);
-
-    params.n = ((nimms >> 6) & 1) ^ 1;
-
-    params.imms = nimms & 0x3F;
-
-    return true;
+    return false;
 }
 
 uint16 CCodeGen_RV64::GetSavedRegisterList(uint32 registerUsage)
@@ -1113,6 +1074,7 @@ void CCodeGen_RV64::Emit_Not_VarVar(const STATEMENT& statement)
     CommitSymbolRegister(dst, dstReg);
 }
 
+#if 0
 void CCodeGen_RV64::Emit_CLZ(CRV64Assembler::REGISTER64 r, CRV64Assembler::REGISTER64 n, CRV64Assembler::REGISTER64 shift, CRV64Assembler::REGISTER64 tmp, CRV64Assembler::REGISTER64 sixtyfour) {
     CRV64Assembler::REGISTER32 tmp32 = static_cast<CRV64Assembler::REGISTER32>(tmp);
     auto l1 = m_assembler.CreateLabel();
@@ -1178,6 +1140,7 @@ void CCodeGen_RV64::Emit_CLZ(CRV64Assembler::REGISTER64 r, CRV64Assembler::REGIS
     m_assembler.Sub  (r,sixtyfour,shift);
     //m_assembler.Ret  ();
 }
+#endif
 
 void CCodeGen_RV64::Emit_Lzc_VarVar(const STATEMENT& statement)
 {
@@ -1295,14 +1258,23 @@ void CCodeGen_RV64::Emit_LoadFromRef_VarVarAny(const STATEMENT& statement)
     auto valueReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
 
-    /*if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex < 0x4000))
+    if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex >= -2048) && (scaledIndex <= 2047))
     {
-        m_assembler.Ldr(valueReg, addressReg, scaledIndex);
+        m_assembler.Lw(valueReg, addressReg, scaledIndex);
     }
-    else*/
+    else
     {
         auto indexReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
-        m_assembler.Ldr(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 4));
+        //m_assembler.Ldr(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 4));
+        auto tmpReg = GetNextTempRegister64();
+        //auto indexReg = PrepareSymbolRegisterUseRef(src2, GetNextTempRegister64());
+        if (scale == 4) {
+            m_assembler.Slli(tmpReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), 2);
+            m_assembler.Add(tmpReg, tmpReg, addressReg);
+        } else {
+            m_assembler.Add(tmpReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg));
+        }
+        m_assembler.Lw(valueReg, tmpReg, 0);
     }
 
     CommitSymbolRegister(dst, valueReg);
@@ -1333,14 +1305,24 @@ void CCodeGen_RV64::Emit_LoadFromRef_Ref_VarVarAny(const STATEMENT& statement)
     auto valueReg = PrepareSymbolRegisterDefRef(dst, GetNextTempRegister64());
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
 
-    /*if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex < 0x8000))
+    if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex >= -2048) && (scaledIndex <= 2047))
     {
-        m_assembler.Ldr(valueReg, addressReg, scaledIndex);
+        m_assembler.Ld(valueReg, addressReg, scaledIndex);
     }
-    else*/
+    else
     {
         auto indexReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
-        m_assembler.Ldr(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 8));
+        //m_assembler.Ldr(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 8));
+        auto tmpReg = GetNextTempRegister64();
+        //auto indexReg = PrepareSymbolRegisterUseRef(src2, GetNextTempRegister64());
+        if (scale == 8) {
+            //assert(0);
+            m_assembler.Slli(tmpReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), 3);
+            m_assembler.Add(tmpReg, tmpReg, addressReg);
+        } else {
+            m_assembler.Add(tmpReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg));
+        }
+        m_assembler.Ld(valueReg, tmpReg, 0);
     }
 
     CommitSymbolRegisterRef(dst, valueReg);
@@ -1354,7 +1336,8 @@ void CCodeGen_RV64::Emit_Load8FromRef_MemVar(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto dstReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
 
-    m_assembler.Ldrb(dstReg, addressReg, 0);
+    //m_assembler.Ldrb(dstReg, addressReg, 0);
+    m_assembler.Lbu(static_cast<CRV64Assembler::REGISTER64>(dstReg), addressReg, 0);
 
     CommitSymbolRegister(dst, dstReg);
 }
@@ -1371,14 +1354,18 @@ void CCodeGen_RV64::Emit_Load8FromRef_MemVarAny(const STATEMENT& statement)
     auto valueReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
 
-    /*if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex < 0x1000))
+    if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex >= -2048) && (scaledIndex <= 2047))
     {
-        m_assembler.Ldrb(valueReg, addressReg, scaledIndex);
+        //m_assembler.Ldrb(valueReg, addressReg, scaledIndex);
+        m_assembler.Lbu(static_cast<CRV64Assembler::REGISTER64>(valueReg), addressReg, scaledIndex);
     }
-    else*/
+    else
     {
         auto indexReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
-        m_assembler.Ldrb(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 1));
+        //m_assembler.Ldrb(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 1));
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Add(tmpReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg));
+        m_assembler.Lbu(static_cast<CRV64Assembler::REGISTER64>(valueReg), tmpReg, 0);
     }
 
     CommitSymbolRegister(dst, valueReg);
@@ -1392,7 +1379,8 @@ void CCodeGen_RV64::Emit_Load16FromRef_MemVar(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto dstReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
 
-    m_assembler.Ldrh(dstReg, addressReg, 0);
+    //m_assembler.Ldrh(dstReg, addressReg, 0);
+    m_assembler.Lhu(static_cast<CRV64Assembler::REGISTER64>(dstReg), addressReg, 0);
 
     CommitSymbolRegister(dst, dstReg);
 }
@@ -1409,14 +1397,18 @@ void CCodeGen_RV64::Emit_Load16FromRef_MemVarAny(const STATEMENT& statement)
     auto valueReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
 
-    /*if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex < 0x2000))
+    if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex >= -2048) && (scaledIndex <= 2047))
     {
-        m_assembler.Ldrh(valueReg, addressReg, scaledIndex);
+        //m_assembler.Ldrh(valueReg, addressReg, scaledIndex);
+        m_assembler.Lhu(static_cast<CRV64Assembler::REGISTER64>(valueReg), addressReg, scaledIndex);
     }
-    else*/
+    else
     {
         auto indexReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
-        m_assembler.Ldrh(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), false);
+        //m_assembler.Ldrh(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), false);
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Add(tmpReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg));
+        m_assembler.Lhu(static_cast<CRV64Assembler::REGISTER64>(valueReg), tmpReg, 0);
     }
 
     CommitSymbolRegister(dst, valueReg);
@@ -1430,7 +1422,8 @@ void CCodeGen_RV64::Emit_StoreAtRef_VarAny(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto valueReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
 
-    m_assembler.Str(valueReg, addressReg, 0);
+    //m_assembler.Str(valueReg, addressReg, 0);
+    m_assembler.Sw(addressReg, static_cast<CRV64Assembler::REGISTER64>(valueReg), 0);
 }
 
 void CCodeGen_RV64::Emit_StoreAtRef_VarAnyAny(const STATEMENT& statement)
@@ -1445,14 +1438,23 @@ void CCodeGen_RV64::Emit_StoreAtRef_VarAnyAny(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto valueReg = PrepareSymbolRegisterUse(src3, GetNextTempRegister());
 
-    /*if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex < 0x4000))
+    if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex >= -2048) && (scaledIndex <= 2047))
     {
-        m_assembler.Str(valueReg, addressReg, scaledIndex);
+        //m_assembler.Str(valueReg, addressReg, scaledIndex);
+        m_assembler.Sw(addressReg, static_cast<CRV64Assembler::REGISTER64>(valueReg), scaledIndex);
     }
-    else*/
+    else
     {
         auto indexReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
-        m_assembler.Str(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 4));
+        //m_assembler.Str(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 4));
+        auto tmpReg = GetNextTempRegister64();
+        if (scale == 4) {
+            m_assembler.Slli(tmpReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), 2);
+            m_assembler.Add(tmpReg, tmpReg, addressReg);
+        } else {
+            m_assembler.Add(tmpReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg));
+        }
+        m_assembler.Sw(tmpReg, static_cast<CRV64Assembler::REGISTER64>(valueReg), 0);
     }
 }
 
@@ -1464,7 +1466,8 @@ void CCodeGen_RV64::Emit_Store8AtRef_VarAny(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto valueReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
 
-    m_assembler.Strb(valueReg, addressReg, 0);
+    //m_assembler.Strb(valueReg, addressReg, 0);
+    m_assembler.Sb(addressReg, static_cast<CRV64Assembler::REGISTER64>(valueReg), 0);
 }
 
 void CCodeGen_RV64::Emit_Store8AtRef_VarAnyAny(const STATEMENT& statement)
@@ -1479,14 +1482,18 @@ void CCodeGen_RV64::Emit_Store8AtRef_VarAnyAny(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto valueReg = PrepareSymbolRegisterUse(src3, GetNextTempRegister());
 
-    /*if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex < 0x1000))
+    if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex >= -2048) && (scaledIndex <= 2047))
     {
-        m_assembler.Strb(valueReg, addressReg, scaledIndex);
+        //m_assembler.Strb(valueReg, addressReg, scaledIndex);
+        m_assembler.Sb(addressReg, static_cast<CRV64Assembler::REGISTER64>(valueReg), scaledIndex);
     }
-    else*/
+    else
     {
         auto indexReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
-        m_assembler.Strb(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 1));
+        //m_assembler.Strb(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 1));
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Add(tmpReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg));
+        m_assembler.Sb(tmpReg, static_cast<CRV64Assembler::REGISTER64>(valueReg), 0);
     }
 }
 
@@ -1498,7 +1505,8 @@ void CCodeGen_RV64::Emit_Store16AtRef_VarAny(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto valueReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
 
-    m_assembler.Strh(valueReg, addressReg, 0);
+    //m_assembler.Strh(valueReg, addressReg, 0);
+    m_assembler.Sh(addressReg, static_cast<CRV64Assembler::REGISTER64>(valueReg), 0);
 }
 
 void CCodeGen_RV64::Emit_Store16AtRef_VarAnyAny(const STATEMENT& statement)
@@ -1513,14 +1521,18 @@ void CCodeGen_RV64::Emit_Store16AtRef_VarAnyAny(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto valueReg = PrepareSymbolRegisterUse(src3, GetNextTempRegister());
 
-    /*if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex < 0x2000))
+    if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex >= -2048) && (scaledIndex <= 2047))
     {
-        m_assembler.Strh(valueReg, addressReg, scaledIndex);
+        //m_assembler.Strh(valueReg, addressReg, scaledIndex);
+        m_assembler.Sh(addressReg, static_cast<CRV64Assembler::REGISTER64>(valueReg), scaledIndex);
     }
-    else*/
+    else
     {
         auto indexReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
-        m_assembler.Strh(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 2));
+        //m_assembler.Strh(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 2));
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Add(tmpReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg));
+        m_assembler.Sh(tmpReg, static_cast<CRV64Assembler::REGISTER64>(valueReg), 0);
     }
 }
 
@@ -1891,7 +1903,7 @@ void CCodeGen_RV64::Emit_CondJmp_VarCst(const STATEMENT& statement)
     auto src1Reg = PrepareSymbolRegisterUse(src1, GetNextTempRegister());
     assert(src2->m_type == SYM_CONSTANT);
 
-    /*if((src2->m_valueLow == 0) && ((statement.jmpCondition == CONDITION_NE) || (statement.jmpCondition == CONDITION_EQ)))
+    if((src2->m_valueLow == 0) && ((statement.jmpCondition == CONDITION_NE) || (statement.jmpCondition == CONDITION_EQ)))
     {
         auto label = GetLabel(statement.jmpBlock);
 
@@ -1908,7 +1920,7 @@ void CCodeGen_RV64::Emit_CondJmp_VarCst(const STATEMENT& statement)
             break;
         }
     }
-    else*/
+    else
     {
         /*ADDSUB_IMM_PARAMS addSubImmParams;
         if(TryGetAddSubImmParams(src2->m_valueLow, addSubImmParams))

@@ -35,9 +35,7 @@ namespace Jitter
 
         struct LOGICAL_IMM_PARAMS
         {
-            uint8 n;
-            uint8 immr;
-            uint8 imms;
+            uint16                                      imm = 0;
         };
 
         struct PARAM_STATE
@@ -854,7 +852,9 @@ namespace Jitter
         void    Emit_Mov_MemRefRegRef(const STATEMENT&);
 
         void    Emit_Not_VarVar(const STATEMENT&);
+#if 0
         void    Emit_CLZ(CRV64Assembler::REGISTER64 r, CRV64Assembler::REGISTER64 n, CRV64Assembler::REGISTER64 shift, CRV64Assembler::REGISTER64 tmp, CRV64Assembler::REGISTER64 sixtyfour);
+#endif
         void    Emit_Lzc_VarVar(const STATEMENT&);
 
         void    Emit_Mov_Mem64Mem64(const STATEMENT&);

@@ -232,14 +232,24 @@ void CCodeGen_RV64::Emit_LoadFromRef_64_MemVarAny(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto dstReg = GetNextTempRegister64();
 
-    if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex < 0x8000))
+    if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && scaledIndex >= -2048 && scaledIndex <= 2047)
     {
         m_assembler.Ld(dstReg, addressReg, scaledIndex);
     }
     else
     {
         auto indexReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
-        m_assembler.Ldr(dstReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 8));
+        //m_assembler.Ldr(dstReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 8));
+        auto tmpReg = GetNextTempRegister64();
+        //auto indexReg = PrepareSymbolRegisterUseRef(src2, GetNextTempRegister64());
+        if (scale == 8) {
+            //assert(0);
+            m_assembler.Slli(tmpReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), 3);
+            m_assembler.Add(tmpReg, tmpReg, addressReg);
+        } else {
+            m_assembler.Add(tmpReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg));
+        }
+        m_assembler.Ld(dstReg, tmpReg, 0);
     }
 
     StoreRegisterInMemory64(dst, dstReg);
@@ -310,16 +320,12 @@ void CCodeGen_RV64::Emit_Add64_MemMemCst(const STATEMENT& statement)
     LoadMemory64InRegister(src1Reg, src1);
     auto constant = src2->GetConstant64();
 
-    /*ADDSUB_IMM_PARAMS addSubImmParams;
-    if(TryGetAddSub64ImmParams(constant, addSubImmParams))
+    ADDSUB_IMM_PARAMS addSubImmParams;
+    if(TryGetAddSub64ImmParams(static_cast<int64>(constant), addSubImmParams))
     {
-        m_assembler.Add(dstReg, src1Reg, addSubImmParams.imm, addSubImmParams.shiftType);
+        m_assembler.Addi(dstReg, src1Reg, addSubImmParams.imm);
     }
-    else if(TryGetAddSub64ImmParams(-static_cast<int64>(constant), addSubImmParams))
-    {
-        m_assembler.Sub(dstReg, src1Reg, addSubImmParams.imm, addSubImmParams.shiftType);
-    }
-    else*/
+    else
     {
         auto src2Reg = GetNextTempRegister64();
         LoadConstant64InRegister(src2Reg, constant);

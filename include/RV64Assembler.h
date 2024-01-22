@@ -204,10 +204,6 @@ public:
 
     void    Ld1_4s(REGISTERMD, REGISTER64);
     void    Ldp_PostIdx(REGISTER64, REGISTER64, REGISTER64, int32);
-    void    Ldr(REGISTER32, REGISTER64, uint32);
-    void    Ldr(REGISTER32, REGISTER64, REGISTER64, bool);
-    void    Ldr(REGISTER64, REGISTER64, uint32);
-    void    Ldr(REGISTER64, REGISTER64, REGISTER64, bool);
     void    Ldrb(REGISTER32, REGISTER64, uint32);
     void    Ldrb(REGISTER32, REGISTER64, REGISTER64, bool);
     void    Ldrh(REGISTER32, REGISTER64, uint32);
@@ -454,7 +450,7 @@ private:
     void    WriteIShiftDouble(uint32 opcode, uint32 rd, uint32 rs1, uint32 shamt);
     void    WriteIShiftWord(uint32 opcode, uint32 rd, uint32 rs1, uint32 shamt);
     void    WriteI(uint32 opcode, uint32 rd, uint32 rs1, int32 imm);
-    void    WriteS(uint32 opcode, uint32 rs1, uint32 rs2, uint32 imm);
+    void    WriteS(uint32 opcode, uint32 rs1, uint32 rs2, int32 imm);
     void    WriteB(uint32 opcode, uint32 rs1, uint32 rs2, int32 imm);
     void    WriteU(uint32 opcode, uint32 rd, int32 imm);
     void    WriteJ(uint32 opcode, uint32 rd, int32 imm);

@@ -555,26 +555,26 @@ void CRV64Assembler::Add_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Add_4s_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, REGISTER64 src2AddrReg, REGISTER32 tmp1Reg, REGISTER32 tmp2Reg)
 {
-    Ldr(tmp1Reg, src1AddrReg, 0);
-    Ldr(tmp2Reg, src2AddrReg, 0);
+    Lw(tmp1Reg, src1AddrReg, 0);
+    Lw(tmp2Reg, src2AddrReg, 0);
     //Add(tmp1Reg, tmp1Reg, tmp2Reg);
     Addw(tmp1Reg, tmp1Reg, tmp2Reg);
     Str(tmp1Reg, dstAddrReg, 0);
 
-    Ldr(tmp1Reg, src1AddrReg, 4);
-    Ldr(tmp2Reg, src2AddrReg, 4);
+    Lw(tmp1Reg, src1AddrReg, 4);
+    Lw(tmp2Reg, src2AddrReg, 4);
     //Add(tmp1Reg, tmp1Reg, tmp2Reg);
     Addw(tmp1Reg, tmp1Reg, tmp2Reg);
     Str(tmp1Reg, dstAddrReg, 4);
 
-    Ldr(tmp1Reg, src1AddrReg, 8);
-    Ldr(tmp2Reg, src2AddrReg, 8);
+    Lw(tmp1Reg, src1AddrReg, 8);
+    Lw(tmp2Reg, src2AddrReg, 8);
     //Add(tmp1Reg, tmp1Reg, tmp2Reg);
     Addw(tmp1Reg, tmp1Reg, tmp2Reg);
     Str(tmp1Reg, dstAddrReg, 8);
 
-    Ldr(tmp1Reg, src1AddrReg, 12);
-    Ldr(tmp2Reg, src2AddrReg, 12);
+    Lw(tmp1Reg, src1AddrReg, 12);
+    Lw(tmp2Reg, src2AddrReg, 12);
     //Add(tmp1Reg, tmp1Reg, tmp2Reg);
     Addw(tmp1Reg, tmp1Reg, tmp2Reg);
     Str(tmp1Reg, dstAddrReg, 12);
@@ -1573,7 +1573,7 @@ void CRV64Assembler::Ldp_PostIdx(REGISTER64 rt, REGISTER64 rt2, REGISTER64 rn, i
         WriteWord(opcode);
     }
 }
-
+#if 0
 void CRV64Assembler::Ldr(REGISTER32 rt, REGISTER64 rn, uint32 offset)
 {
     /*assert((offset & 0x03) == 0);
@@ -1656,7 +1656,7 @@ void CRV64Assembler::Ldr(REGISTER64 rt, REGISTER64 rn, REGISTER64 rm, bool scale
         Lsr(rm, rm, 3);
     }
 }
-
+#endif
 void CRV64Assembler::Ldrb(REGISTER32 rt, REGISTER64 rn, uint32 offset)
 {
     /*uint32 scaledOffset = offset;
@@ -2226,7 +2226,7 @@ void CRV64Assembler::Sdiv(REGISTER32 rd, REGISTER32 rn, REGISTER32 rm)
 
 void CRV64Assembler::Shl_4s_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, uint8 shmt, REGISTER32 tmp1Reg) {
     for (int i=0; i<16; i+=4) {
-        Ldr(tmp1Reg, src1AddrReg, i);
+        Lw(tmp1Reg, src1AddrReg, i);
         Lsl(tmp1Reg, tmp1Reg, shmt & 0x1f);
         Str(tmp1Reg, dstAddrReg, i);
     }
@@ -2343,8 +2343,8 @@ void CRV64Assembler::Smin_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 void CRV64Assembler::Smax_4s_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, REGISTER64 src2AddrReg, REGISTER32 tmp1Reg, REGISTER32 tmp2Reg)
 {
     for (int i=0; i<16; i+=4) {
-        Ldr(tmp1Reg, src1AddrReg, i);
-        Ldr(tmp2Reg, src2AddrReg, i);
+        Lw(tmp1Reg, src1AddrReg, i);
+        Lw(tmp2Reg, src2AddrReg, i);
 
         uint16 offset = 2*4;
         // bge
@@ -2392,8 +2392,8 @@ void CRV64Assembler::Smax_8h_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, 
 void CRV64Assembler::Smin_4s_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, REGISTER64 src2AddrReg, REGISTER32 tmp1Reg, REGISTER32 tmp2Reg)
 {
     for (int i=0; i<16; i+=4) {
-        Ldr(tmp1Reg, src1AddrReg, i);
-        Ldr(tmp2Reg, src2AddrReg, i);
+        Lw(tmp1Reg, src1AddrReg, i);
+        Lw(tmp2Reg, src2AddrReg, i);
 
         uint16 offset = 2*4;
         // bge
@@ -2479,7 +2479,7 @@ void CRV64Assembler::Smull(REGISTER64 rd, REGISTER32 rn, REGISTER32 rm, REGISTER
 
 void CRV64Assembler::Sshr_4s_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, uint8 shmt, REGISTER32 tmp1Reg) {
     for (int i=0; i<16; i+=4) {
-        Ldr(tmp1Reg, src1AddrReg, i);
+        Lw(tmp1Reg, src1AddrReg, i);
         Asr(tmp1Reg, tmp1Reg, shmt & 0x1f);
         Str(tmp1Reg, dstAddrReg, i);
     }
@@ -2846,8 +2846,8 @@ void CRV64Assembler::Str_1q(REGISTERMD rt, REGISTER64 rn, REGISTER64 rm, bool sc
 void CRV64Assembler::Sub_4s_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, REGISTER64 src2AddrReg, REGISTER32 tmp1Reg, REGISTER32 tmp2Reg)
 {
     for (int i=0; i<16; i+=4) {
-        Ldr(tmp1Reg, src1AddrReg, i);
-        Ldr(tmp2Reg, src2AddrReg, i);
+        Lw(tmp1Reg, src1AddrReg, i);
+        Lw(tmp2Reg, src2AddrReg, i);
         //Sub(tmp1Reg, tmp1Reg, tmp2Reg);
         Subw(tmp1Reg, tmp1Reg, tmp2Reg);
         Str(tmp1Reg, dstAddrReg, i);
@@ -3156,7 +3156,7 @@ void CRV64Assembler::Uqsub_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Ushr_4s_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, uint8 shmt, REGISTER32 tmp1Reg) {
     for (int i=0; i<16; i+=4) {
-        Ldr(tmp1Reg, src1AddrReg, i);
+        Lw(tmp1Reg, src1AddrReg, i);
         Lsr(tmp1Reg, tmp1Reg, shmt & 0x1f);
         Str(tmp1Reg, dstAddrReg, i);
     }
@@ -3654,10 +3654,10 @@ void CRV64Assembler::Sd(REGISTER64 rs1, REGISTER64 rs2, int32 imm)
     WriteS(0x00003023, rs1, rs2, imm);
 }
 
-void CRV64Assembler::WriteS(uint32 opcode, uint32 rs1, uint32 rs2, uint32 imm)
+void CRV64Assembler::WriteS(uint32 opcode, uint32 rs1, uint32 rs2, int32 imm)
 {
     // check imm fits in signed 12 bit
-    assert((imm & 0xFFF) == imm);
+    assert(SIGN_EXTEND_12(imm) == imm);
     assert((imm >= -2048) && (imm <= 2047));
     opcode |= (rs2 << 20);
     opcode |= (rs1 << 15);
