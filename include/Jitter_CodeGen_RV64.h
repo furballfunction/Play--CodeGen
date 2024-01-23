@@ -522,6 +522,36 @@ namespace Jitter
             static OpRegType OpReg() { return &CRV64Assembler::Sqsub_4s; }
         };
 
+        struct MDOP_CMPEQB_MEM : public MDOP_BASE3_MEM
+        {
+            static OpRegType OpReg() { return &CRV64Assembler::Cmeq_16b_Mem; }
+        };
+
+        struct MDOP_CMPEQH_MEM : public MDOP_BASE3_MEM
+        {
+            static OpRegType OpReg() { return &CRV64Assembler::Cmeq_8h_Mem; }
+        };
+
+        struct MDOP_CMPEQW_MEM : public MDOP_BASE3_MEM
+        {
+            static OpRegType OpReg() { return &CRV64Assembler::Cmeq_4s_Mem; }
+        };
+
+        struct MDOP_CMPGTB_MEM : public MDOP_BASE3_MEM
+        {
+            static OpRegType OpReg() { return &CRV64Assembler::Cmgt_16b_Mem; }
+        };
+
+        struct MDOP_CMPGTH_MEM : public MDOP_BASE3_MEM
+        {
+            static OpRegType OpReg() { return &CRV64Assembler::Cmgt_8h_Mem; }
+        };
+
+        struct MDOP_CMPGTW_MEM : public MDOP_BASE3_MEM
+        {
+            static OpRegType OpReg() { return &CRV64Assembler::Cmgt_4s_Mem; }
+        };
+
         struct MDOP_CMPEQB : public MDOP_BASE3
         {
             static OpRegType OpReg() { return &CRV64Assembler::Cmeq_16b; }

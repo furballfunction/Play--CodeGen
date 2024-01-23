@@ -901,6 +901,22 @@ void CRV64Assembler::Clz(REGISTER32 rd, REGISTER32 rn)
 
 }
 
+void CRV64Assembler::Cmeq_16b_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, REGISTER64 src2AddrReg, REGISTER32 tmp1Reg, REGISTER32 tmp2Reg)
+{
+    for (int i=0; i<16; i++) {
+        Lbu(static_cast<REGISTER64>(tmp1Reg), src1AddrReg, i);
+        Lbu(static_cast<REGISTER64>(tmp2Reg), src2AddrReg, i);
+
+        Subw(tmp1Reg, tmp1Reg, tmp2Reg);
+        Sltiu(tmp1Reg, tmp1Reg, 1);
+        // extend to 32 bit
+        Slli(tmp1Reg, tmp1Reg, 31);
+        Srai(static_cast<REGISTER64>(tmp1Reg), static_cast<REGISTER64>(tmp1Reg), 31);
+
+        Sb(dstAddrReg, static_cast<REGISTER64>(tmp1Reg), i);
+    }
+}
+
 void CRV64Assembler::Cmeq_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
     assert(0);
@@ -909,6 +925,22 @@ void CRV64Assembler::Cmeq_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
     opcode |= (rn <<  5);
     opcode |= (rm << 16);
     WriteWord(opcode);
+}
+
+void CRV64Assembler::Cmeq_8h_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, REGISTER64 src2AddrReg, REGISTER32 tmp1Reg, REGISTER32 tmp2Reg)
+{
+    for (int i=0; i<16; i+=2) {
+        Lhu(static_cast<REGISTER64>(tmp1Reg), src1AddrReg, i);
+        Lhu(static_cast<REGISTER64>(tmp2Reg), src2AddrReg, i);
+
+        Subw(tmp1Reg, tmp1Reg, tmp2Reg);
+        Sltiu(tmp1Reg, tmp1Reg, 1);
+        // extend to 32 bit
+        Slli(tmp1Reg, tmp1Reg, 31);
+        Srai(static_cast<REGISTER64>(tmp1Reg), static_cast<REGISTER64>(tmp1Reg), 31);
+
+        Sh(dstAddrReg, static_cast<REGISTER64>(tmp1Reg), i);
+    }
 }
 
 void CRV64Assembler::Cmeq_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
@@ -921,6 +953,22 @@ void CRV64Assembler::Cmeq_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
     WriteWord(opcode);
 }
 
+void CRV64Assembler::Cmeq_4s_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, REGISTER64 src2AddrReg, REGISTER32 tmp1Reg, REGISTER32 tmp2Reg)
+{
+    for (int i=0; i<16; i+=4) {
+        Lwu(static_cast<REGISTER64>(tmp1Reg), src1AddrReg, i);
+        Lwu(static_cast<REGISTER64>(tmp2Reg), src2AddrReg, i);
+
+        Subw(tmp1Reg, tmp1Reg, tmp2Reg);
+        Sltiu(tmp1Reg, tmp1Reg, 1);
+        // extend to 32 bit
+        Slli(tmp1Reg, tmp1Reg, 31);
+        Srai(static_cast<REGISTER64>(tmp1Reg), static_cast<REGISTER64>(tmp1Reg), 31);
+
+        Sw(dstAddrReg, static_cast<REGISTER64>(tmp1Reg), i);
+    }
+}
+
 void CRV64Assembler::Cmeq_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
     assert(0);
@@ -929,6 +977,21 @@ void CRV64Assembler::Cmeq_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
     opcode |= (rn <<  5);
     opcode |= (rm << 16);
     WriteWord(opcode);
+}
+
+void CRV64Assembler::Cmgt_16b_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, REGISTER64 src2AddrReg, REGISTER32 tmp1Reg, REGISTER32 tmp2Reg)
+{
+    for (int i=0; i<16; i++) {
+        Lb(static_cast<REGISTER64>(tmp1Reg), src1AddrReg, i);
+        Lb(static_cast<REGISTER64>(tmp2Reg), src2AddrReg, i);
+
+        Slt(tmp1Reg, tmp2Reg, tmp1Reg);
+        // extend to 32 bit
+        Slli(tmp1Reg, tmp1Reg, 31);
+        Srai(static_cast<REGISTER64>(tmp1Reg), static_cast<REGISTER64>(tmp1Reg), 31);
+
+        Sb(dstAddrReg, static_cast<REGISTER64>(tmp1Reg), i);
+    }
 }
 
 void CRV64Assembler::Cmgt_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
@@ -941,6 +1004,21 @@ void CRV64Assembler::Cmgt_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
     WriteWord(opcode);
 }
 
+void CRV64Assembler::Cmgt_8h_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, REGISTER64 src2AddrReg, REGISTER32 tmp1Reg, REGISTER32 tmp2Reg)
+{
+    for (int i=0; i<16; i+=2) {
+        Lh(static_cast<REGISTER64>(tmp1Reg), src1AddrReg, i);
+        Lh(static_cast<REGISTER64>(tmp2Reg), src2AddrReg, i);
+
+        Slt(tmp1Reg, tmp2Reg, tmp1Reg);
+        // extend to 32 bit
+        Slli(tmp1Reg, tmp1Reg, 31);
+        Srai(static_cast<REGISTER64>(tmp1Reg), static_cast<REGISTER64>(tmp1Reg), 31);
+ 
+        Sh(dstAddrReg, static_cast<REGISTER64>(tmp1Reg), i);
+    }
+}
+
 void CRV64Assembler::Cmgt_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
     assert(0);
@@ -949,6 +1027,21 @@ void CRV64Assembler::Cmgt_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
     opcode |= (rn <<  5);
     opcode |= (rm << 16);
     WriteWord(opcode);
+}
+
+void CRV64Assembler::Cmgt_4s_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, REGISTER64 src2AddrReg, REGISTER32 tmp1Reg, REGISTER32 tmp2Reg)
+{
+    for (int i=0; i<16; i+=4) {
+        Lw(static_cast<REGISTER64>(tmp1Reg), src1AddrReg, i);
+        Lw(static_cast<REGISTER64>(tmp2Reg), src2AddrReg, i);
+
+        Slt(tmp1Reg, tmp2Reg, tmp1Reg);
+        // extend to 32 bit
+        Slli(tmp1Reg, tmp1Reg, 31);
+        Srai(static_cast<REGISTER64>(tmp1Reg), static_cast<REGISTER64>(tmp1Reg), 31);
+
+        Sw(dstAddrReg, static_cast<REGISTER64>(tmp1Reg), i);
+    }
 }
 
 void CRV64Assembler::Cmgt_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
