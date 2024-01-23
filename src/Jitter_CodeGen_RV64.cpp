@@ -1070,7 +1070,8 @@ void CCodeGen_RV64::Emit_Not_VarVar(const STATEMENT& statement)
 
     auto dstReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
     auto src1Reg = PrepareSymbolRegisterUse(src1, GetNextTempRegister());
-    m_assembler.Mvn(dstReg, src1Reg);
+    //m_assembler.Mvn(dstReg, src1Reg);
+    m_assembler.Xoriw(dstReg, src1Reg, -1);
     CommitSymbolRegister(dst, dstReg);
 }
 
@@ -1225,8 +1226,10 @@ void CCodeGen_RV64::Emit_IsRefNull_VarVar(const STATEMENT& statement)
     auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
     auto dstReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
 
-    m_assembler.XorSltu(static_cast<CRV64Assembler::REGISTER64>(dstReg), addressReg, CRV64Assembler::xZR);
-    m_assembler.Sltiu(static_cast<CRV64Assembler::REGISTER64>(dstReg), static_cast<CRV64Assembler::REGISTER64>(dstReg), 1);
+    //m_assembler.XorSltu(static_cast<CRV64Assembler::REGISTER64>(dstReg), addressReg, CRV64Assembler::xZR);
+    //m_assembler.Sltiu(static_cast<CRV64Assembler::REGISTER64>(dstReg), static_cast<CRV64Assembler::REGISTER64>(dstReg), 1);
+    m_assembler.Sltiu(static_cast<CRV64Assembler::REGISTER64>(dstReg), addressReg, 1);
+
 
     CommitSymbolRegister(dst, dstReg);
 }
@@ -1723,8 +1726,8 @@ void CCodeGen_RV64::Emit_RetVal_Reg128(const STATEMENT& statement)
 
     /*m_assembler.Ins_1d(g_registersMd[dst->m_valueLow], 0, CRV64Assembler::x0);
     m_assembler.Ins_1d(g_registersMd[dst->m_valueLow], 1, CRV64Assembler::x1);*/
-    m_assembler.Addi(CRV64Assembler::x0, CRV64Assembler::x0, 0);
-    m_assembler.Addi(CRV64Assembler::x1, CRV64Assembler::x1, 0);
+    //m_assembler.Addi(CRV64Assembler::x0, CRV64Assembler::x0, 0);
+    //m_assembler.Addi(CRV64Assembler::x1, CRV64Assembler::x1, 0);
     //m_assembler.WriteWord(0);
 }
 
@@ -2007,11 +2010,15 @@ void CCodeGen_RV64::Cmp_GetFlag(CRV64Assembler::REGISTER32 registerId, Jitter::C
     switch(condition)
     {
     case CONDITION_EQ:
-        m_assembler.XorSltu(registerId, src1Reg, src2Reg);
+        //m_assembler.XorSltu(registerId, src1Reg, src2Reg);
+        //m_assembler.Sltiu(registerId, registerId, 1);
+        m_assembler.Subw(registerId, src1Reg, src2Reg);
         m_assembler.Sltiu(registerId, registerId, 1);
         break;
     case CONDITION_NE:
-        m_assembler.XorSltu(registerId, src1Reg, src2Reg);
+        //m_assembler.XorSltu(registerId, src1Reg, src2Reg);
+        m_assembler.Subw(registerId, src1Reg, src2Reg);
+        m_assembler.Sltu(static_cast<CRV64Assembler::REGISTER64>(registerId), CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(registerId));
         break;
     case CONDITION_LT:
         m_assembler.Slt(registerId, src1Reg, src2Reg);
