@@ -311,6 +311,7 @@ void CCodeGen_RV64::Emit_Div_Tmp64AnyAny(const STATEMENT& statement)
 CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_constMatchers[] =
 {
     { OP_NOP,            MATCH_NIL,            MATCH_NIL,            MATCH_NIL,           MATCH_NIL,      &CCodeGen_RV64::Emit_Nop                                 },
+    { OP_BREAK,          MATCH_NIL,            MATCH_NIL,            MATCH_NIL,           MATCH_NIL,      &CCodeGen_RV64::Emit_Break                               },
 
     { OP_MOV,            MATCH_REGISTER,       MATCH_REGISTER,       MATCH_NIL,           MATCH_NIL,      &CCodeGen_RV64::Emit_Mov_RegReg                          },
     { OP_MOV,            MATCH_REGISTER,       MATCH_MEMORY,         MATCH_NIL,           MATCH_NIL,      &CCodeGen_RV64::Emit_Mov_RegMem                          },
@@ -984,6 +985,11 @@ void CCodeGen_RV64::Emit_Nop(const STATEMENT&)
 
 }
 
+void CCodeGen_RV64::Emit_Break(const STATEMENT& statement)
+{
+	m_assembler.WriteWord(0xffffffff);
+}
+
 void CCodeGen_RV64::Emit_Mov_RegReg(const STATEMENT& statement)
 {
     auto dst = statement.dst->GetSymbol().get();
@@ -1155,6 +1161,7 @@ void CCodeGen_RV64::Emit_Lzc_VarVar(const STATEMENT& statement)
     auto startCountLabel = m_assembler.CreateLabel();
     auto doneLabel = m_assembler.CreateLabel();
 
+    // s.ext.w
     m_assembler.Mov(dstRegister, src1Register);
     m_assembler.BCc(CRV64Assembler::CONDITION_EQ, set32Label, dstRegister, CRV64Assembler::wZR);
     m_assembler.BCc(CRV64Assembler::CONDITION_GE, startCountLabel, dstRegister, CRV64Assembler::wZR);
@@ -1166,7 +1173,12 @@ void CCodeGen_RV64::Emit_Lzc_VarVar(const STATEMENT& statement)
     //startCount:
     m_assembler.MarkLabel(startCountLabel);
 
+#if THEAD_EXTENSIONS
+    m_assembler.Th_ff1(dstRegister, dstRegister);
+    m_assembler.Addiw(dstRegister, dstRegister, -32);
+#else
     m_assembler.Clz(dstRegister, dstRegister);
+#endif
 
     m_assembler.Addiw(dstRegister, dstRegister, -1);
     m_assembler.BCc(CRV64Assembler::CONDITION_AL, doneLabel, dstRegister, dstRegister);

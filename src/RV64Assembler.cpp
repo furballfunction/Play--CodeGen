@@ -891,6 +891,24 @@ void CRV64Assembler::Cbz(REGISTER64 rt, LABEL label)
     WriteWord(0);
 }
 
+void CRV64Assembler::Th_ff0(REGISTER32 rd, REGISTER32 rs1)
+{
+    // th.ff0 requires XTheadBb
+    uint32 opcode = 0x8400100B;
+    opcode |= (rd  << 7);
+    opcode |= (rs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Th_ff1(REGISTER32 rd, REGISTER32 rs1)
+{
+    // th.ff1 requires XTheadBb
+    uint32 opcode = 0x8600100B;
+    opcode |= (rd  << 7);
+    opcode |= (rs1 << 15);
+    WriteWord(opcode);
+}
+
 void CRV64Assembler::Clz(REGISTER32 rd, REGISTER32 rn)
 {
     // clzw requires Zbb
@@ -2187,6 +2205,7 @@ void CRV64Assembler::Mvn(REGISTER32 rd, REGISTER32 rm)
     opcode |= (rm  << 16);
     WriteWord(opcode);*/
 
+    // s.ext.w
     Mov(rd, rm);
 
     //Xori(rd, rd, -1);
