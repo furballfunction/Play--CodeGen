@@ -3,6 +3,10 @@
 #include "Jitter_CodeGen_RV64.h"
 #include "BitManip.h"
 
+#include <sys/utsname.h>
+#include <stdio.h>
+#include <string.h>
+
 using namespace Jitter;
 
 CRV64Assembler::REGISTER32    CCodeGen_RV64::g_registers[MAX_REGISTERS] =
@@ -415,6 +419,7 @@ CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_constMatchers[] =
 
 CCodeGen_RV64::CCodeGen_RV64()
 {
+    CheckMachine();
     const auto copyMatchers =
         [this](const CONSTMATCHER* constMatchers)
         {
@@ -435,6 +440,17 @@ CCodeGen_RV64::CCodeGen_RV64()
     copyMatchers(g_64ConstMatchers);
     copyMatchers(g_fpuConstMatchers);
     copyMatchers(g_mdConstMatchers);
+}
+
+void CCodeGen_RV64::CheckMachine() {
+    m_thead_extentions = false;
+    struct utsname osInfo{};
+    uname(&osInfo);
+    printf("osInfo.nodename: %s\n", osInfo.nodename);
+    if (strcmp(osInfo.nodename, "lpi4a") == 0) {
+        printf("lpi4a detected using THEAD extentions\n");
+        m_thead_extentions = true;
+    }
 }
 
 void CCodeGen_RV64::SetGenerateRelocatableCalls(bool generateRelocatableCalls)
@@ -1173,12 +1189,12 @@ void CCodeGen_RV64::Emit_Lzc_VarVar(const STATEMENT& statement)
     //startCount:
     m_assembler.MarkLabel(startCountLabel);
 
-#if THEAD_EXTENSIONS
-    m_assembler.Th_ff1(dstRegister, dstRegister);
-    m_assembler.Addiw(dstRegister, dstRegister, -32);
-#else
-    m_assembler.Clz(dstRegister, dstRegister);
-#endif
+    if (m_thead_extentions) {
+        m_assembler.Th_ff1(dstRegister, dstRegister);
+        m_assembler.Addiw(dstRegister, dstRegister, -32);
+    } else {
+        m_assembler.Clz(dstRegister, dstRegister);
+    }
 
     m_assembler.Addiw(dstRegister, dstRegister, -1);
     m_assembler.BCc(CRV64Assembler::CONDITION_AL, doneLabel, dstRegister, dstRegister);

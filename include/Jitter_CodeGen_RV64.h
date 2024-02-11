@@ -12,6 +12,8 @@ namespace Jitter
                    CCodeGen_RV64();
         virtual    ~CCodeGen_RV64() = default;
 
+        void            CheckMachine();
+
         void            SetGenerateRelocatableCalls(bool);
 
         void            GenerateCode(const StatementList&, unsigned int) override;
@@ -1106,5 +1108,6 @@ namespace Jitter
         uint32                 m_paramSpillBase = 0;
 
         bool    m_generateRelocatableCalls = false;
+        bool    m_thead_extentions = false;
     };
 };
