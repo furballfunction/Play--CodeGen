@@ -1007,7 +1007,7 @@ namespace Jitter
         void    Emit_Fp_ToIntTrunc_MemMem(const STATEMENT&);
         void    Emit_Fp_LdCst_TmpCst(const STATEMENT&);
 
-#if SUPPORT_128
+// MD RVV
         //MD
         template <typename> void    Emit_Md_VarVar(const STATEMENT&);
         template <typename> void    Emit_Md_VarVarVar(const STATEMENT&);
@@ -1020,7 +1020,7 @@ namespace Jitter
         void    Emit_Md_Mov_RegReg(const STATEMENT&);
         void    Emit_Md_Mov_RegMem(const STATEMENT&);
         void    Emit_Md_Mov_MemReg(const STATEMENT&);
-        void    Emit_Md_Mov_MemMem(const STATEMENT&);
+        //void    Emit_Md_Mov_MemMem(const STATEMENT&);
 
         void    Emit_Md_LoadFromRef_VarVar(const STATEMENT&);
         void    Emit_Md_LoadFromRef_VarVarAny(const STATEMENT&);
@@ -1038,7 +1038,8 @@ namespace Jitter
         void    Emit_MergeTo256_MemVarVar(const STATEMENT&);
         void    Emit_Md_Srl256_VarMemVar(const STATEMENT&);
         void    Emit_Md_Srl256_VarMemCst(const STATEMENT&);
-#else
+
+// MD MEM
         //MDOP
         template <typename> void				Emit_Md_MemMem1S(const STATEMENT&);
         template <typename> void				Emit_Md_MemMemIR1S(const STATEMENT&);
@@ -1079,12 +1080,13 @@ namespace Jitter
         template <uint32> void					Emit_Md_UnpackWD_MemMemMem(const STATEMENT&);
 
         void									Emit_MergeTo256_MemMemMem(const STATEMENT&);
-#endif
+// END
 
         static CONSTMATCHER    g_constMatchers[];
         static CONSTMATCHER    g_64ConstMatchers[];
         static CONSTMATCHER    g_fpuConstMatchers[];
-        static CONSTMATCHER    g_mdConstMatchers[];
+        static CONSTMATCHER    g_mdConstMatchersMem[];
+        static CONSTMATCHER    g_mdConstMatchersRVV[];
 
         static CRV64Assembler::REGISTER32    g_registers[MAX_REGISTERS];
         static CRV64Assembler::REGISTERMD    g_registersMd[MAX_MDREGISTERS];

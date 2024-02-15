@@ -439,7 +439,13 @@ CCodeGen_RV64::CCodeGen_RV64()
     copyMatchers(g_constMatchers);
     copyMatchers(g_64ConstMatchers);
     copyMatchers(g_fpuConstMatchers);
-    copyMatchers(g_mdConstMatchers);
+
+    // Only MD Mem is supported
+    if (m_thead_extentions) {
+        copyMatchers(g_mdConstMatchersRVV);
+    } else {
+        copyMatchers(g_mdConstMatchersMem);
+    }
 }
 
 void CCodeGen_RV64::CheckMachine() {
