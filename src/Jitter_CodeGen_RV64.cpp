@@ -998,12 +998,12 @@ void CCodeGen_RV64::MarkLabel(const STATEMENT& statement)
 
 void CCodeGen_RV64::Emit_Nop(const STATEMENT&)
 {
-
+    m_assembler.Addi(CRV64Assembler::xZR, CRV64Assembler::xZR, 0);
 }
 
 void CCodeGen_RV64::Emit_Break(const STATEMENT& statement)
 {
-	m_assembler.WriteWord(0xffffffff);
+    m_assembler.Break();
 }
 
 void CCodeGen_RV64::Emit_Mov_RegReg(const STATEMENT& statement)

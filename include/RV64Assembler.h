@@ -425,6 +425,8 @@ public:
     void    Auipc(REGISTER64 rd, int32 imm);
     void    Jal(REGISTER64 rd, int32 imm);
 
+    void    Break();
+
 private:
     struct LABELREF
     {
@@ -469,7 +471,6 @@ private:
     void    WriteLogicalOpImm(uint32 opcode, uint32 shamt, uint32 rn, uint32 rd);
     void    WriteLoadStoreOpImm(uint32, uint32 imm, uint32 rn, uint32 rt);
     void    WriteMoveWideOpImm(uint32, uint32 hw, uint32 imm, uint32 rd);
-public:
     void    WriteWord(uint32);
 private:
 

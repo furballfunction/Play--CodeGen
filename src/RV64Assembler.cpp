@@ -90,18 +90,22 @@ void CRV64Assembler::ResolveLabelReferences()
             /*uint32 opcode = 0x14000000;
             opcode |= (offset & 0x3FFFFFF);*/
 
-            uint32 opcode = 0x00000063;
+            /*uint32 opcode = 0x00000063;
             opcode |= ((offset & 0x1E) >> 1) << 8;
             opcode |= ((offset & 0x800) >> 11) << 7;
             opcode |= ((offset & 0x1000) >> 12) << 31;
             opcode |= ((offset & 0x7E0) >> 5) << 25;
             opcode |= (xZR << 15);
             opcode |= (xZR << 20);
-            WriteWord(opcode);
+            WriteWord(opcode);*/
             //assert(0);
+
+            Jal(xZR, offset);
         }
         else
         {
+            //assert((offset & 0x1FFE) == offset);
+            assert((offset >= -4096) && (offset <= 4094) && ((offset & 0x1) == 0));
             if(labelReference.cbz || labelReference.cbz64)
             {
                 assert((labelReference.condition == CONDITION_EQ) || (labelReference.condition == CONDITION_NE));
@@ -3822,7 +3826,7 @@ void CRV64Assembler::WriteB(uint32 opcode, uint32 rs1, uint32 rs2, int32 imm)
 {
     // check imm fits in signed? 12 bit with the first bit missing (only multiples of 2)
     assert((imm & 0x1FFE) == imm);
-    assert((imm >= -4096) && (imm <= 4095) && ((imm & 0x1) == 0));
+    assert((imm >= -4096) && (imm <= 4094) && ((imm & 0x1) == 0));
     opcode |= ((imm & 0x1E) >> 1) << 8;
     opcode |= ((imm & 0x800) >> 11) << 7;
     opcode |= ((imm & 0x1000) >> 12) << 31;
@@ -3872,7 +3876,8 @@ void CRV64Assembler::Jal(REGISTER64 rd, int32 imm)
 void CRV64Assembler::WriteJ(uint32 opcode, uint32 rd, int32 imm)
 {
     // check imm fits in signed 20 bit with the first bit missing (only multiples of 2)
-    assert((imm & 0xFFFFE) == imm);
+    //assert((imm & 0xFFFFE) == imm);
+    // 524286 is the highest possible as 524287 last bit would be 1
     assert((imm >= -524288) && (imm <= 524287) && ((imm & 0x1) == 0));
     opcode |= (rd << 7);
     opcode |= ((imm & 0x7FE) >> 1) << 21;
@@ -3880,6 +3885,14 @@ void CRV64Assembler::WriteJ(uint32 opcode, uint32 rd, int32 imm)
     opcode |= ((imm & 0xFF000) >> 12) << 12;
     opcode |= ((imm & 0x100000) >> 20) << 31;
     WriteWord(opcode);
+}
+
+/*
+ * Debug instructions
+ */
+
+void CRV64Assembler::Break() {
+    WriteWord(0x00100073);
 }
 
 void CRV64Assembler::WriteAddSubOpImm(uint32 opcode, uint32 shift, uint32 imm, uint32 rn, uint32 rd, bool flip)
