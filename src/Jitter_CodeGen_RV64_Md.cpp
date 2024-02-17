@@ -84,8 +84,8 @@ void CCodeGen_RV64::Emit_Md_MemMem(const STATEMENT& statement)
     auto dst = statement.dst->GetSymbol().get();
     auto src1 = statement.src1->GetSymbol().get();
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
     //auto dstReg = CRV64Assembler::q0;
     //auto src1Reg = CRV64Assembler::q1;
 
@@ -106,8 +106,8 @@ void CCodeGen_RV64::Emit_Md_MemMem1S(const STATEMENT& statement)
     auto dst = statement.dst->GetSymbol().get();
     auto src1 = statement.src1->GetSymbol().get();
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
     //auto dstReg = CRV64Assembler::q0;
     //auto src1Reg = CRV64Assembler::q1;
 
@@ -136,8 +136,8 @@ void CCodeGen_RV64::Emit_Md_MemMemIR1S(const STATEMENT& statement)
     auto dst = statement.dst->GetSymbol().get();
     auto src1 = statement.src1->GetSymbol().get();
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
     //auto dstReg = CRV64Assembler::q0;
     //auto src1Reg = CRV64Assembler::q1;
 
@@ -166,8 +166,8 @@ void CCodeGen_RV64::Emit_Md_MemMemSR1I(const STATEMENT& statement)
     auto dst = statement.dst->GetSymbol().get();
     auto src1 = statement.src1->GetSymbol().get();
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
     //auto dstReg = CRV64Assembler::q0;
     //auto src1Reg = CRV64Assembler::q1;
 
@@ -196,9 +196,9 @@ void CCodeGen_RV64::Emit_Md_MemMemMem(const STATEMENT& statement)
     auto src1 = statement.src1->GetSymbol().get();
     auto src2 = statement.src2->GetSymbol().get();
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
-    auto src2AddrReg = CRV64Assembler::x2;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
     //auto dstReg = CRV64Assembler::q0;
     //auto src1Reg = CRV64Assembler::q1;
     //auto src2Reg = CRV64Assembler::q2;
@@ -228,9 +228,9 @@ void CCodeGen_RV64::Emit_Md_MemMemMem1S(const STATEMENT& statement)
     auto src1 = statement.src1->GetSymbol().get();
     auto src2 = statement.src2->GetSymbol().get();
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
-    auto src2AddrReg = CRV64Assembler::x2;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1);
@@ -258,9 +258,9 @@ void CCodeGen_RV64::Emit_Md_MemMemMemIR1S(const STATEMENT& statement)
     auto src1 = statement.src1->GetSymbol().get();
     auto src2 = statement.src2->GetSymbol().get();
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
-    auto src2AddrReg = CRV64Assembler::x2;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1);
@@ -316,9 +316,9 @@ void CCodeGen_RV64::Emit_Md_MemMemMemRev1S(const STATEMENT& statement)
     auto src1 = statement.src1->GetSymbol().get();
     auto src2 = statement.src2->GetSymbol().get();
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
-    auto src2AddrReg = CRV64Assembler::x2;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1);
@@ -346,9 +346,9 @@ void CCodeGen_RV64::Emit_Md_MemMemMemRevIR1S(const STATEMENT& statement)
     auto src1 = statement.src1->GetSymbol().get();
     auto src2 = statement.src2->GetSymbol().get();
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
-    auto src2AddrReg = CRV64Assembler::x2;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1);
@@ -381,8 +381,8 @@ void CCodeGen_RV64::Emit_Md_Shift_MemMemCst(const STATEMENT& statement)
     //auto dstReg = CRV64Assembler::q0;
     //auto src1Reg = CRV64Assembler::q1;
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1);
@@ -404,8 +404,8 @@ void CCodeGen_RV64::Emit_Md_Mov_MemMem(const STATEMENT& statement)
     //auto src1AddrReg = CRV64Assembler::r1;
     //auto tmpReg = CRV64Assembler::q0;
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
     auto tmpReg = GetNextTempRegister();
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
@@ -425,9 +425,9 @@ void CCodeGen_RV64::Emit_Md_DivS_MemMemMem(const STATEMENT& statement)
     auto src1 = statement.src1->GetSymbol().get();
     auto src2 = statement.src2->GetSymbol().get();
 
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
-    auto src2AddrReg = CRV64Assembler::x2;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1);
@@ -460,8 +460,8 @@ void CCodeGen_RV64::Emit_Md_Srl256_MemMemCst(const STATEMENT& statement)
     //auto dstAddrReg = CRV64Assembler::r0;
     //auto src1AddrReg = CRV64Assembler::r1;
     //auto dstReg = CRV64Assembler::q0;
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
 
     uint32 offset = (src2->m_valueLow & 0x7F) / 8;
 
@@ -490,10 +490,10 @@ void CCodeGen_RV64::Emit_Md_Srl256_MemMemVar(const STATEMENT& statement)
     //auto dstAddrReg = CRV64Assembler::r1;
     //auto src1AddrReg = CRV64Assembler::r2;
     //auto src2Register = PrepareSymbolRegisterUse(src2, CRV64Assembler::r3);
-    auto offsetRegister = CRV64Assembler::w0;
-    auto dstAddrReg = CRV64Assembler::x1;
-    auto src1AddrReg = CRV64Assembler::x2;
-    auto src2Register = PrepareSymbolRegisterUse(src2, CRV64Assembler::w3);
+    auto offsetRegister = CRV64Assembler::a0;
+    auto dstAddrReg = CRV64Assembler::x11;
+    auto src1AddrReg = CRV64Assembler::x12;
+    auto src2Register = PrepareSymbolRegisterUse(src2, CRV64Assembler::a3);
 
     //auto dstReg = CRV64Assembler::q0;
 
@@ -530,8 +530,8 @@ void CCodeGen_RV64::Emit_Md_LoadFromRef_MemVar(const STATEMENT& statement)
 
     //auto src1AddrReg = PrepareSymbolRegisterUseRef(src1, CRV64Assembler::r0);
     //auto dstAddrReg = CRV64Assembler::r1;
-    auto src1AddrReg = PrepareSymbolRegisterUseRef(src1, CRV64Assembler::x0);
-    auto dstAddrReg = CRV64Assembler::x1;
+    auto src1AddrReg = PrepareSymbolRegisterUseRef(src1, CRV64Assembler::x10);
+    auto dstAddrReg = CRV64Assembler::x11;
 
     //auto dstReg = CRV64Assembler::q0;
 
@@ -580,11 +580,11 @@ void CCodeGen_RV64::Emit_Md_LoadFromRef_MemVarAny(const STATEMENT& statement)
     //auto src1AddrIdxReg = CRV64Assembler::r1;
     //auto dstAddrReg = CRV64Assembler::r2;
     //auto dstReg = CRV64Assembler::q0;
-    auto src1AddrIdxReg = CRV64Assembler::x1;
-    auto dstAddrReg = CRV64Assembler::x2;
+    auto src1AddrIdxReg = CRV64Assembler::x11;
+    auto dstAddrReg = CRV64Assembler::x12;
 
     //LoadRefIndexAddress(src1AddrIdxReg, src1, CRV64Assembler::r0, src2, CRV64Assembler::r3, scale);
-    LoadRefIndexAddress(src1AddrIdxReg, src1, CRV64Assembler::x0, src2, CRV64Assembler::x3, scale);
+    LoadRefIndexAddress(src1AddrIdxReg, src1, CRV64Assembler::x10, src2, CRV64Assembler::x13, scale);
     LoadMemory128AddressInRegister(dstAddrReg, dst);
 
     //m_assembler.Vld1_32x4(dstReg, src1AddrIdxReg);
@@ -604,8 +604,8 @@ void CCodeGen_RV64::Emit_Md_StoreAtRef_VarMem(const STATEMENT& statement)
 
     //auto src1AddrReg = PrepareSymbolRegisterUseRef(src1, CRV64Assembler::r0);
     //auto src2AddrReg = CRV64Assembler::r1;
-    auto src1AddrReg = PrepareSymbolRegisterUseRef(src1, CRV64Assembler::x0);
-    auto src2AddrReg = CRV64Assembler::x1;
+    auto src1AddrReg = PrepareSymbolRegisterUseRef(src1, CRV64Assembler::x10);
+    auto src2AddrReg = CRV64Assembler::x11;
 
     //auto src2Reg = CRV64Assembler::q0;
 
@@ -633,11 +633,11 @@ void CCodeGen_RV64::Emit_Md_StoreAtRef_VarAnyMem(const STATEMENT& statement)
     //auto src1AddrIdxReg = CRV64Assembler::r1;
     //auto valueAddrReg = CRV64Assembler::r2;
     //auto valueReg = CRV64Assembler::q0;
-    auto src1AddrIdxReg = CRV64Assembler::x1;
-    auto valueAddrReg = CRV64Assembler::x2;
+    auto src1AddrIdxReg = CRV64Assembler::x11;
+    auto valueAddrReg = CRV64Assembler::x12;
 
     //LoadRefIndexAddress(src1AddrIdxReg, src1, CRV64Assembler::r0, src2, CRV64Assembler::r3, scale);
-    LoadRefIndexAddress(src1AddrIdxReg, src1, CRV64Assembler::x0, src2, CRV64Assembler::x3, scale);
+    LoadRefIndexAddress(src1AddrIdxReg, src1, CRV64Assembler::x10, src2, CRV64Assembler::x13, scale);
     LoadMemory128AddressInRegister(valueAddrReg, src3);
 
     //m_assembler.Vld1_32x4(valueReg, valueAddrReg);
@@ -665,9 +665,9 @@ void CCodeGen_RV64::Emit_Md_MovMasked_MemMemMem(const STATEMENT& statement)
     //auto tmpReg = CRV64Assembler::r3;
     //auto dstReg = CRV64Assembler::q0;
     //auto src2Reg = CRV64Assembler::q2;
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src2AddrReg = CRV64Assembler::x2;
-    auto tmpReg = CRV64Assembler::w3;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src2AddrReg = CRV64Assembler::x12;
+    auto tmpReg = CRV64Assembler::a3;
     //auto dstReg = CRV64Assembler::q0;
     //auto src2Reg = CRV64Assembler::q2;
     //auto dstRegLo = static_cast<CRV64Assembler::DOUBLE_REGISTER>(dstReg + 0);
@@ -707,9 +707,9 @@ void CCodeGen_RV64::Emit_Md_Expand_MemReg(const STATEMENT& statement)
 
     //auto dstAddrReg = CRV64Assembler::r0;
     //auto tmpReg = CRV64Assembler::q0;
-    auto dstAddrReg = CRV64Assembler::x0;
+    auto dstAddrReg = CRV64Assembler::x10;
     //auto tmpReg = GetNextTempRegister();
-    auto src1Reg = PrepareSymbolRegisterUse(src1, CRV64Assembler::w1);
+    auto src1Reg = PrepareSymbolRegisterUse(src1, CRV64Assembler::a1);
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
 
@@ -730,8 +730,8 @@ void CCodeGen_RV64::Emit_Md_Expand_MemMem(const STATEMENT& statement)
     //auto dstAddrReg = CRV64Assembler::r0;
     //auto src1Reg = CRV64Assembler::r1;
     //auto tmpReg = CRV64Assembler::q0;
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1Reg = CRV64Assembler::w1;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1Reg = CRV64Assembler::a1;
 
     LoadMemoryInRegister(src1Reg, src1);
     LoadMemory128AddressInRegister(dstAddrReg, dst);
@@ -752,8 +752,8 @@ void CCodeGen_RV64::Emit_Md_Expand_MemCst(const STATEMENT& statement)
     //auto dstAddrReg = CRV64Assembler::r0;
     //auto src1Reg = CRV64Assembler::r1;
     //auto tmpReg = CRV64Assembler::q0;
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1Reg = CRV64Assembler::w1;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1Reg = CRV64Assembler::a1;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
 
@@ -785,8 +785,8 @@ void CCodeGen_RV64::Emit_Md_ClampS_MemMem(const STATEMENT& statement)
     //auto dstReg = CRV64Assembler::q0;
     //auto cst0Reg = CRV64Assembler::q1;
     //auto cst1Reg = CRV64Assembler::q2;
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
     auto cst1Reg = GetNextTempRegister();
     auto cst2Reg = GetNextTempRegister();
     auto tmpReg = GetNextTempRegister();
@@ -826,8 +826,8 @@ void CCodeGen_RV64::Emit_Md_MakeSz_VarMem(const STATEMENT& statement)
     //auto signReg = CRV64Assembler::q1;
     //auto zeroReg = CRV64Assembler::q2;
     //auto cstReg = CRV64Assembler::q3;
-    auto src1AddrReg = CRV64Assembler::x0;
-    auto cstAddrReg = CRV64Assembler::x1;
+    auto src1AddrReg = CRV64Assembler::x10;
+    auto cstAddrReg = CRV64Assembler::x11;
 
     //LITERAL128 lit1(0x0004080C1014181CUL, 0xFFFFFFFFFFFFFFFFUL);
     //LITERAL128 lit2(0x8040201008040201UL, 0x0000000000000000UL);
@@ -836,7 +836,7 @@ void CCodeGen_RV64::Emit_Md_MakeSz_VarMem(const STATEMENT& statement)
     //m_assembler.Vld1_32x4(src1Reg, src1AddrReg);
 
     //auto dstReg = PrepareSymbolRegisterDef(dst, CRV64Assembler::r0);
-    auto dstReg = PrepareSymbolRegisterDef(dst, CRV64Assembler::w0);
+    auto dstReg = PrepareSymbolRegisterDef(dst, CRV64Assembler::a0);
 
     //m_assembler.Vcltz_I32(signReg, src1Reg);
     auto tmpReg = GetNextTempRegister();
@@ -847,7 +847,7 @@ void CCodeGen_RV64::Emit_Md_MakeSz_VarMem(const STATEMENT& statement)
     m_assembler.Li(oneReg, 0x00000001);
     auto outReg = GetNextTempRegister();
     //m_assembler.Add(outReg, CRV64Assembler::wZR, CRV64Assembler::wZR);
-    m_assembler.Addw(outReg, CRV64Assembler::wZR, CRV64Assembler::wZR);
+    m_assembler.Addw(outReg, CRV64Assembler::zero, CRV64Assembler::zero);
     //auto one2Reg = GetNextTempRegister();
     //m_assembler.Li(one2Reg, 0x1);
     auto signReg = GetNextTempRegister();
@@ -900,7 +900,7 @@ void CCodeGen_RV64::Emit_Md_MakeSz_VarMem(const STATEMENT& statement)
         opcode |= ((offset & 0x800) >> 11) << 7;
         opcode |= ((offset & 0x1000) >> 12) << 31;
         opcode |= ((offset & 0x7E0) >> 5) << 25;
-        opcode |= (CRV64Assembler::wZR << 15);
+        opcode |= (CRV64Assembler::zero << 15);
         opcode |= (signReg << 20);
         //m_assembler.WriteWord(opcode);
         m_assembler.Beq(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(signReg), offset);
@@ -926,7 +926,7 @@ void CCodeGen_RV64::Emit_Md_MakeSz_VarMem(const STATEMENT& statement)
         opcode |= ((offset & 0x800) >> 11) << 7;
         opcode |= ((offset & 0x1000) >> 12) << 31;
         opcode |= ((offset & 0x7E0) >> 5) << 25;
-        opcode |= (CRV64Assembler::wZR << 15);
+        opcode |= (CRV64Assembler::zero << 15);
         opcode |= (zeroReg << 20);
         //m_assembler.WriteWord(opcode);
         m_assembler.Beq(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(zeroReg), offset);
@@ -975,9 +975,9 @@ void CCodeGen_RV64::Emit_Md_PackHB_MemMemMem(const STATEMENT& statement)
     //auto dstReg = CRV64Assembler::q0;
     //auto src1Reg = CRV64Assembler::q1;
     //auto src2Reg = CRV64Assembler::q2;
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
-    auto src2AddrReg = CRV64Assembler::x2;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1);
@@ -1041,9 +1041,9 @@ void CCodeGen_RV64::Emit_Md_PackWH_MemMemMem(const STATEMENT& statement)
     //auto dstReg = CRV64Assembler::q0;
     //auto src1Reg = CRV64Assembler::q1;
     //auto src2Reg = CRV64Assembler::q2;
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
-    auto src2AddrReg = CRV64Assembler::x2;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1);
@@ -1107,9 +1107,9 @@ void CCodeGen_RV64::Emit_Md_UnpackBH_MemMemMem(const STATEMENT& statement)
     //auto src2AddrReg = CRV64Assembler::r2;
     //auto src1Reg = CRV64Assembler::d0;
     //auto src2Reg = CRV64Assembler::d1;
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
-    auto src2AddrReg = CRV64Assembler::x2;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1, offset);
@@ -1143,9 +1143,9 @@ void CCodeGen_RV64::Emit_Md_UnpackHW_MemMemMem(const STATEMENT& statement)
     //auto src2AddrReg = CRV64Assembler::r2;
     //auto src1Reg = CRV64Assembler::d0;
     //auto src2Reg = CRV64Assembler::d1;
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
-    auto src2AddrReg = CRV64Assembler::x2;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1, offset);
@@ -1179,9 +1179,9 @@ void CCodeGen_RV64::Emit_Md_UnpackWD_MemMemMem(const STATEMENT& statement)
     //auto src2AddrReg = CRV64Assembler::r2;
     //auto src1Reg = CRV64Assembler::d0;
     //auto src2Reg = CRV64Assembler::d2;
-    auto dstAddrReg = CRV64Assembler::x0;
-    auto src1AddrReg = CRV64Assembler::x1;
-    auto src2AddrReg = CRV64Assembler::x2;
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1, offset);
@@ -1217,10 +1217,10 @@ void CCodeGen_RV64::Emit_MergeTo256_MemMemMem(const STATEMENT& statement)
     //auto src2AddrReg = CRV64Assembler::r3;
     //auto src1Reg = CRV64Assembler::q0;
     //auto src2Reg = CRV64Assembler::q1;
-    auto dstLoAddrReg = CRV64Assembler::x0;
-    auto dstHiAddrReg = CRV64Assembler::x1;
-    auto src1AddrReg = CRV64Assembler::x2;
-    auto src2AddrReg = CRV64Assembler::x3;
+    auto dstLoAddrReg = CRV64Assembler::x10;
+    auto dstHiAddrReg = CRV64Assembler::x11;
+    auto src1AddrReg = CRV64Assembler::x12;
+    auto src2AddrReg = CRV64Assembler::x13;
     //auto src1Reg = CRV64Assembler::q0;
     //auto src2Reg = CRV64Assembler::q1;
 

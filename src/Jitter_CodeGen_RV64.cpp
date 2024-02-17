@@ -11,15 +11,15 @@ using namespace Jitter;
 
 CRV64Assembler::REGISTER32    CCodeGen_RV64::g_registers[MAX_REGISTERS] =
 {
-    CRV64Assembler::w20,
-    CRV64Assembler::w21,
-    CRV64Assembler::w22,
-    CRV64Assembler::w23,
-    CRV64Assembler::w24,
-    CRV64Assembler::w25,
-    CRV64Assembler::w26,
-    CRV64Assembler::w27,
-    CRV64Assembler::w28,
+    CRV64Assembler::s3,
+    CRV64Assembler::s4,
+    CRV64Assembler::s5,
+    CRV64Assembler::s6,
+    CRV64Assembler::s7,
+    CRV64Assembler::s8,
+    CRV64Assembler::s9,
+    CRV64Assembler::s10,
+    CRV64Assembler::s11,
 };
 
 CRV64Assembler::REGISTERMD    CCodeGen_RV64::g_registersMd[MAX_MDREGISTERS] =
@@ -34,24 +34,24 @@ CRV64Assembler::REGISTERMD    CCodeGen_RV64::g_registersMd[MAX_MDREGISTERS] =
 
 CRV64Assembler::REGISTER32    CCodeGen_RV64::g_tempRegisters[MAX_TEMP_REGS] =
 {
-    CRV64Assembler::w9,
-    CRV64Assembler::w10,
-    CRV64Assembler::w11,
-    CRV64Assembler::w12,
-    CRV64Assembler::w13,
-    CRV64Assembler::w14,
-    CRV64Assembler::w15
+    CRV64Assembler::t0,
+    CRV64Assembler::t1,
+    CRV64Assembler::t2,
+    CRV64Assembler::t3,
+    CRV64Assembler::t4,
+    CRV64Assembler::t5,
+    CRV64Assembler::t6
 };
 
 CRV64Assembler::REGISTER64    CCodeGen_RV64::g_tempRegisters64[MAX_TEMP_REGS] =
 {
-    CRV64Assembler::x9,
-    CRV64Assembler::x10,
-    CRV64Assembler::x11,
-    CRV64Assembler::x12,
-    CRV64Assembler::x13,
-    CRV64Assembler::x14,
-    CRV64Assembler::x15
+    CRV64Assembler::x5,
+    CRV64Assembler::x6,
+    CRV64Assembler::x7,
+    CRV64Assembler::x28,
+    CRV64Assembler::x29,
+    CRV64Assembler::x30,
+    CRV64Assembler::x31
 };
 
 CRV64Assembler::REGISTERMD    CCodeGen_RV64::g_tempRegistersMd[MAX_TEMP_MD_REGS] =
@@ -64,29 +64,29 @@ CRV64Assembler::REGISTERMD    CCodeGen_RV64::g_tempRegistersMd[MAX_TEMP_MD_REGS]
 
 CRV64Assembler::REGISTER32    CCodeGen_RV64::g_paramRegisters[MAX_PARAM_REGS] =
 {
-    CRV64Assembler::w0,
-    CRV64Assembler::w1,
-    CRV64Assembler::w2,
-    CRV64Assembler::w3,
-    CRV64Assembler::w4,
-    CRV64Assembler::w5,
-    CRV64Assembler::w6,
-    CRV64Assembler::w7,
+    CRV64Assembler::a0,
+    CRV64Assembler::a1,
+    CRV64Assembler::a2,
+    CRV64Assembler::a3,
+    CRV64Assembler::a4,
+    CRV64Assembler::a5,
+    CRV64Assembler::a6,
+    CRV64Assembler::a7,
 };
 
 CRV64Assembler::REGISTER64    CCodeGen_RV64::g_paramRegisters64[MAX_PARAM_REGS] =
 {
-    CRV64Assembler::x0,
-    CRV64Assembler::x1,
-    CRV64Assembler::x2,
-    CRV64Assembler::x3,
-    CRV64Assembler::x4,
-    CRV64Assembler::x5,
-    CRV64Assembler::x6,
-    CRV64Assembler::x7,
+    CRV64Assembler::x10,
+    CRV64Assembler::x11,
+    CRV64Assembler::x12,
+    CRV64Assembler::x13,
+    CRV64Assembler::x14,
+    CRV64Assembler::x15,
+    CRV64Assembler::x16,
+    CRV64Assembler::x17,
 };
 
-CRV64Assembler::REGISTER64    CCodeGen_RV64::g_baseRegister = CRV64Assembler::x19;
+CRV64Assembler::REGISTER64    CCodeGen_RV64::g_baseRegister = CRV64Assembler::x18;
 
 const LITERAL128 CCodeGen_RV64::g_fpClampMask1(0x7F7FFFFF, 0x7F7FFFFF, 0x7F7FFFFF, 0x7F7FFFFF);
 const LITERAL128 CCodeGen_RV64::g_fpClampMask2(0xFF7FFFFF, 0xFF7FFFFF, 0xFF7FFFFF, 0xFF7FFFFF);
@@ -441,11 +441,11 @@ CCodeGen_RV64::CCodeGen_RV64()
     copyMatchers(g_fpuConstMatchers);
 
     // Only MD Mem is supported
-    if (m_thead_extentions) {
-        copyMatchers(g_mdConstMatchersRVV);
-    } else {
+    //if (m_thead_extentions) {
+    //    copyMatchers(g_mdConstMatchersRVV);
+    //} else {
         copyMatchers(g_mdConstMatchersMem);
-    }
+    //}
 }
 
 void CCodeGen_RV64::CheckMachine() {
@@ -937,7 +937,7 @@ uint16 CCodeGen_RV64::GetSavedRegisterList(uint32 registerUsage)
 void CCodeGen_RV64::Emit_Prolog(const StatementList& statements, uint32 stackSize)
 {
     uint32 maxParamSpillSize = GetMaxParamSpillSize(statements);
-    m_assembler.Stp_PreIdx(CRV64Assembler::x29, CRV64Assembler::x30, CRV64Assembler::xSP, -16);
+    m_assembler.Stp_PreIdx(CRV64Assembler::xFP, CRV64Assembler::xRA, CRV64Assembler::xSP, -16);
 
     //Preserve saved registers
     for(uint32 i = 0; i < 16; i++)
@@ -949,7 +949,7 @@ void CCodeGen_RV64::Emit_Prolog(const StatementList& statements, uint32 stackSiz
             m_assembler.Stp_PreIdx(reg0, reg1, CRV64Assembler::xSP, -16);
         }
     }
-    m_assembler.Mov_Sp(CRV64Assembler::x29, CRV64Assembler::xSP);
+    m_assembler.Mov_Sp(CRV64Assembler::xFP, CRV64Assembler::xSP);
     uint32 totalStackAlloc = stackSize + maxParamSpillSize;
     int64 signedReverseTotalStackAlloc = -static_cast<int64>(totalStackAlloc);
     int16 signedReverse12TotalStackAlloc = SIGN_EXTEND_12_INT16(signedReverseTotalStackAlloc);
@@ -960,12 +960,12 @@ void CCodeGen_RV64::Emit_Prolog(const StatementList& statements, uint32 stackSiz
         //assert(0);
         m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, signedReverse12TotalStackAlloc);
     }
-    m_assembler.Mov(g_baseRegister, CRV64Assembler::x0);
+    m_assembler.Mov(g_baseRegister, CRV64Assembler::x10);
 }
 
 void CCodeGen_RV64::Emit_Epilog()
 {
-    m_assembler.Mov_Sp(CRV64Assembler::xSP, CRV64Assembler::x29);
+    m_assembler.Mov_Sp(CRV64Assembler::xSP, CRV64Assembler::xFP);
 
     //Restore saved registers
     for(int32 i = 15; i >= 0; i--)
@@ -977,7 +977,7 @@ void CCodeGen_RV64::Emit_Epilog()
             m_assembler.Ldp_PostIdx(reg0, reg1, CRV64Assembler::xSP, 16);
         }
     }
-    m_assembler.Ldp_PostIdx(CRV64Assembler::x29, CRV64Assembler::x30, CRV64Assembler::xSP, 16);
+    m_assembler.Ldp_PostIdx(CRV64Assembler::xFP, CRV64Assembler::xRA, CRV64Assembler::xSP, 16);
 }
 
 CRV64Assembler::LABEL CCodeGen_RV64::GetLabel(uint32 blockId)
@@ -1185,12 +1185,12 @@ void CCodeGen_RV64::Emit_Lzc_VarVar(const STATEMENT& statement)
 
     // s.ext.w
     m_assembler.Mov(dstRegister, src1Register);
-    m_assembler.BCc(CRV64Assembler::CONDITION_EQ, set32Label, dstRegister, CRV64Assembler::wZR);
-    m_assembler.BCc(CRV64Assembler::CONDITION_GE, startCountLabel, dstRegister, CRV64Assembler::wZR);
+    m_assembler.BCc(CRV64Assembler::CONDITION_EQ, set32Label, dstRegister, CRV64Assembler::zero);
+    m_assembler.BCc(CRV64Assembler::CONDITION_GE, startCountLabel, dstRegister, CRV64Assembler::zero);
 
     //reverse:
     m_assembler.Mvn(dstRegister, dstRegister);
-    m_assembler.BCc(CRV64Assembler::CONDITION_EQ, set32Label, dstRegister, CRV64Assembler::wZR);
+    m_assembler.BCc(CRV64Assembler::CONDITION_EQ, set32Label, dstRegister, CRV64Assembler::zero);
 
     //startCount:
     m_assembler.MarkLabel(startCountLabel);
@@ -1738,20 +1738,20 @@ void CCodeGen_RV64::Emit_RetVal_Reg(const STATEMENT& statement)
 {
     auto dst = statement.dst->GetSymbol().get();
     assert(dst->m_type == SYM_REGISTER);
-    m_assembler.Mov(g_registers[dst->m_valueLow], CRV64Assembler::w0);
+    m_assembler.Mov(g_registers[dst->m_valueLow], CRV64Assembler::a0);
 }
 
 void CCodeGen_RV64::Emit_RetVal_Tmp(const STATEMENT& statement)
 {
     auto dst = statement.dst->GetSymbol().get();
     assert(dst->m_type == SYM_TEMPORARY);
-    StoreRegisterInMemory(dst, CRV64Assembler::w0);
+    StoreRegisterInMemory(dst, CRV64Assembler::a0);
 }
 
 void CCodeGen_RV64::Emit_RetVal_Mem64(const STATEMENT& statement)
 {
     auto dst = statement.dst->GetSymbol().get();
-    StoreRegisterInMemory64(dst, CRV64Assembler::x0);
+    StoreRegisterInMemory64(dst, CRV64Assembler::x10);
 }
 
 void CCodeGen_RV64::Emit_RetVal_Reg128(const STATEMENT& statement)
@@ -1772,8 +1772,8 @@ void CCodeGen_RV64::Emit_RetVal_Mem128(const STATEMENT& statement)
     auto dstAddrReg = GetNextTempRegister64();
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
-    m_assembler.Str(CRV64Assembler::x0, dstAddrReg, 0);
-    m_assembler.Str(CRV64Assembler::x1, dstAddrReg, 8);
+    m_assembler.Str(CRV64Assembler::x10, dstAddrReg, 0);
+    m_assembler.Str(CRV64Assembler::x11, dstAddrReg, 8);
     //m_assembler.WriteWord(0);
 }
 

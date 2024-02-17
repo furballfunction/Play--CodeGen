@@ -272,7 +272,7 @@ void CRV64Assembler::Clamp_si32(REGISTER64 tmp1Reg, REGISTER64 tmp2Reg) {
     auto tmp2Reg32 = static_cast<CRV64Assembler::REGISTER32>(tmp2Reg);
 
     //Sub(tmp2Reg32, wZR, 1, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp2Reg32, wZR, -1);
+    Addiw(tmp2Reg32, zero, -1);
     Slli(tmp2Reg32, tmp2Reg32, 1);
     Lsr(tmp2Reg32, tmp2Reg32, 1);
 
@@ -288,14 +288,14 @@ void CRV64Assembler::Clamp_si32(REGISTER64 tmp1Reg, REGISTER64 tmp2Reg) {
     WriteWord(opcode);
 
     //Sub(tmp1Reg32, wZR, 1, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg32, wZR, -1);
+    Addiw(tmp1Reg32, zero, -1);
     Slli(tmp1Reg32, tmp1Reg32, 1);
     Lsr(tmp1Reg32, tmp1Reg32, 1);
 
 
 
     //Sub(tmp2Reg32, wZR, 1, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp2Reg32, wZR, -1);
+    Addiw(tmp2Reg32, zero, -1);
     Slli(tmp2Reg32, tmp2Reg32, 1);
     Lsr(tmp2Reg32, tmp2Reg32, 1);
 
@@ -317,7 +317,7 @@ void CRV64Assembler::Clamp_si32(REGISTER64 tmp1Reg, REGISTER64 tmp2Reg) {
     WriteWord(opcode);
 
     //Sub(tmp1Reg32, wZR, 1, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg32, wZR, -1);
+    Addiw(tmp1Reg32, zero, -1);
     Slli(tmp1Reg32, tmp1Reg32, 1);
     Lsr(tmp1Reg32, tmp1Reg32, 1);
 
@@ -344,10 +344,10 @@ void CRV64Assembler::Clamp_ui32(REGISTER64 tmp1Reg, REGISTER64 tmp2Reg) {
     WriteWord(opcode);
 
     //Add(tmp1Reg32, wZR, 0, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg32, wZR, 0);
+    Addiw(tmp1Reg32, zero, 0);
 
     //Sub(tmp2Reg32, wZR, 1, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp2Reg32, wZR, -1);
+    Addiw(tmp2Reg32, zero, -1);
     Lsr(tmp2Reg, tmp2Reg, 32);
 
     offset = 4*3;
@@ -362,13 +362,13 @@ void CRV64Assembler::Clamp_ui32(REGISTER64 tmp1Reg, REGISTER64 tmp2Reg) {
     WriteWord(opcode);
 
     //Sub(tmp1Reg32, wZR, 1, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg32, wZR, -1);
+    Addiw(tmp1Reg32, zero, -1);
     Lsr(tmp1Reg, tmp1Reg, 32);
 }
 
 void CRV64Assembler::Clamp_si16(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
     //Add(tmp2Reg, wZR, 0x7f, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp2Reg, wZR, 0x7f);
+    Addiw(tmp2Reg, zero, 0x7f);
     Slli(tmp2Reg, tmp2Reg, 8);
     //Add(tmp2Reg, tmp2Reg, 0xff, ADDSUB_IMM_SHIFT_LSL0);
     Addiw(tmp2Reg, tmp2Reg, 0xff);
@@ -385,7 +385,7 @@ void CRV64Assembler::Clamp_si16(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
     WriteWord(opcode);
 
     //Add(tmp1Reg, wZR, 0x7f, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg, wZR, 0x7f);
+    Addiw(tmp1Reg, zero, 0x7f);
     Slli(tmp1Reg, tmp1Reg, 8);
     //Add(tmp1Reg, tmp1Reg, 0xff, ADDSUB_IMM_SHIFT_LSL0);
     Addiw(tmp1Reg, tmp1Reg, 0xff);
@@ -393,7 +393,7 @@ void CRV64Assembler::Clamp_si16(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
 
 
     //Add(tmp2Reg, wZR, 0x7f, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp2Reg, wZR, 0x7f);
+    Addiw(tmp2Reg, zero, 0x7f);
     Slli(tmp2Reg, tmp2Reg, 8);
     //Add(tmp2Reg, tmp2Reg, 0xff, ADDSUB_IMM_SHIFT_LSL0);
     Addiw(tmp2Reg, tmp2Reg, 0xff);
@@ -416,7 +416,7 @@ void CRV64Assembler::Clamp_si16(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
     WriteWord(opcode);
 
     //Add(tmp1Reg, wZR, 0x7f, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg, wZR, 0x7f);
+    Addiw(tmp1Reg, zero, 0x7f);
     Slli(tmp1Reg, tmp1Reg, 8);
     //Add(tmp1Reg, tmp1Reg, 0xff, ADDSUB_IMM_SHIFT_LSL0);
     Addiw(tmp1Reg, tmp1Reg, 0xff);
@@ -437,14 +437,14 @@ void CRV64Assembler::Clamp_ui16(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
     opcode |= ((offset & 0x1000) >> 12) << 31;
     opcode |= ((offset & 0x7E0) >> 5) << 25;
     opcode |= (tmp1Reg << 15);
-    opcode |= (wZR << 20);
+    opcode |= (zero << 20);
     WriteWord(opcode);
 
     //Add(tmp1Reg, wZR, 0, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg, wZR, 0);
+    Addiw(tmp1Reg, zero, 0);
 
     //Add(tmp2Reg, wZR, 0xff, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp2Reg, wZR, 0xff);
+    Addiw(tmp2Reg, zero, 0xff);
     Slli(tmp2Reg, tmp2Reg, 8);
     //Add(tmp2Reg, tmp2Reg, 0xff, ADDSUB_IMM_SHIFT_LSL0);
     Addiw(tmp2Reg, tmp2Reg, 0xff);
@@ -461,7 +461,7 @@ void CRV64Assembler::Clamp_ui16(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
     WriteWord(opcode);
 
     //Add(tmp1Reg, wZR, 0xff, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg, wZR, 0xff);
+    Addiw(tmp1Reg, zero, 0xff);
     Slli(tmp1Reg, tmp1Reg, 8);
     //Add(tmp1Reg, tmp1Reg, 0xff, ADDSUB_IMM_SHIFT_LSL0);
     Addiw(tmp1Reg, tmp1Reg, 0xff);
@@ -469,7 +469,7 @@ void CRV64Assembler::Clamp_ui16(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
 
 void CRV64Assembler::Clamp_si8(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
     //Add(tmp2Reg, wZR, 0x7f, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp2Reg, wZR, 0x7f);
+    Addiw(tmp2Reg, zero, 0x7f);
 
     uint16 offset = 2*4;
     // bge
@@ -483,11 +483,11 @@ void CRV64Assembler::Clamp_si8(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
     WriteWord(opcode);
 
     //Add(tmp1Reg, wZR, 0x7f, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg, wZR, 0x7f);
+    Addiw(tmp1Reg, zero, 0x7f);
 
 
     //Add(tmp2Reg, wZR, 0x7f, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp2Reg, wZR, 0x7f);
+    Addiw(tmp2Reg, zero, 0x7f);
 
     opcode = 0x00004013;
     opcode |= (tmp2Reg <<  7);
@@ -507,7 +507,7 @@ void CRV64Assembler::Clamp_si8(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
     WriteWord(opcode);
 
     //Add(tmp1Reg, wZR, 0x7f, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg, wZR, 0x7f);
+    Addiw(tmp1Reg, zero, 0x7f);
 
     opcode = 0x00004013;
     opcode |= (tmp1Reg <<  7);
@@ -525,13 +525,13 @@ void CRV64Assembler::Clamp_ui8(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
     opcode |= ((offset & 0x1000) >> 12) << 31;
     opcode |= ((offset & 0x7E0) >> 5) << 25;
     opcode |= (tmp1Reg << 15);
-    opcode |= (wZR << 20);
+    opcode |= (zero << 20);
     WriteWord(opcode);
     //Add(tmp1Reg, wZR, 0, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg, wZR, 0);
+    Addiw(tmp1Reg, zero, 0);
 
     //Add(tmp2Reg, wZR, 0xff, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp2Reg, wZR, 0xff);
+    Addiw(tmp2Reg, zero, 0xff);
     offset = 8;
     // bgeu
     opcode = 0x00007063;
@@ -544,7 +544,7 @@ void CRV64Assembler::Clamp_ui8(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
     WriteWord(opcode);
 
     //Add(tmp1Reg, wZR, 0xff, ADDSUB_IMM_SHIFT_LSL0);
-    Addiw(tmp1Reg, wZR, 0xff);
+    Addiw(tmp1Reg, zero, 0xff);
 }
 
 void CRV64Assembler::Add_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
@@ -1109,7 +1109,7 @@ void CRV64Assembler::XorSltu(REGISTER32 rd, REGISTER32 rn, REGISTER32 rm)
     // sltu rd, x0, rd
     opcode = 0x00003033;
     opcode |= (rd << 7);
-    opcode |= (wZR  << 15);
+    opcode |= (zero  << 15);
     opcode |= (rd  << 20);
     WriteWord(opcode);
 }
@@ -1127,7 +1127,7 @@ void CRV64Assembler::XorSltu(REGISTER64 rd, REGISTER64 rn, REGISTER64 rm)
     // sltu rd, x0, rd
     opcode = 0x00003033;
     opcode |= (rd << 7);
-    opcode |= (wZR  << 15);
+    opcode |= (zero  << 15);
     opcode |= (rd  << 20);
     WriteWord(opcode);
 }
@@ -1157,7 +1157,7 @@ void CRV64Assembler::Cmp(REGISTER32 rn, REGISTER32 rm)
 {
     assert(0);
     uint32 opcode = 0x6B000000;
-    opcode |= (wZR << 0);
+    opcode |= (zero << 0);
     opcode |= (rn  << 5);
     opcode |= (rm  << 16);
     WriteWord(opcode);
@@ -1167,7 +1167,7 @@ void CRV64Assembler::Cmp(REGISTER64 rn, REGISTER64 rm)
 {
     assert(0);
     uint32 opcode = 0xEB000000;
-    opcode |= (wZR << 0);
+    opcode |= (zero << 0);
     opcode |= (rn  << 5);
     opcode |= (rm  << 16);
     WriteWord(opcode);
@@ -1178,9 +1178,9 @@ void CRV64Assembler::Cset(REGISTER32 rd, CONDITION condition)
     assert(0);
     uint32 opcode = 0x1A800400;
     opcode |= (rd  << 0);
-    opcode |= (wZR << 5);
+    opcode |= (zero << 5);
     opcode |= ((condition ^ 1) << 12);	//Inverting lsb inverts condition
-    opcode |= (wZR << 16);
+    opcode |= (zero << 16);
     WriteWord(opcode);
 }
 
@@ -2069,7 +2069,7 @@ void CRV64Assembler::Slli(CRV64Assembler::REGISTER32 rd, CRV64Assembler::REGISTE
 void CRV64Assembler::Li(CRV64Assembler::REGISTER32 registerId, uint32 constant)
 {
     if ((constant & 0x000007FF) == constant) {
-        Addiw(registerId, wZR, constant);
+        Addiw(registerId, zero, constant);
     /*} else if (((int32)constant)>=-2048 && ((int32)constant)<=-1) {
         // Need to clear the upper 32 bits?
         Addiw(registerId, wZR, constant);*/
@@ -3100,7 +3100,7 @@ void CRV64Assembler::Tst(REGISTER32 rn, REGISTER32 rm)
 {
     assert(0);
     uint32 opcode = 0x6A000000;
-    opcode |= (wZR << 0);
+    opcode |= (zero << 0);
     opcode |= (rn <<  5);
     opcode |= (rm << 16);
     WriteWord(opcode);
@@ -3110,7 +3110,7 @@ void CRV64Assembler::Tst(REGISTER64 rn, REGISTER64 rm)
 {
     assert(0);
     uint32 opcode = 0xEA000000;
-    opcode |= (wZR << 0);
+    opcode |= (zero << 0);
     opcode |= (rn <<  5);
     opcode |= (rm << 16);
     WriteWord(opcode);

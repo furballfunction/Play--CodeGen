@@ -9,52 +9,28 @@ class CRV64Assembler
 {
 public:
 
-    /*enum REGISTER32
-    {
-        w0,  w1,  w2,  w3,
-        w4,  w5,  w6,  w7,
-        w8,  w9,  w10, w11,
-        w12, w13, w14, w15,
-        w16, w17, w18, w19,
-        w20, w21, w22, w23,
-        w24, w25, w26, w27,
-        w28, w29, w30, wZR = 0
-    };*/
-
     enum REGISTER32
     {
-        w0=10,  w1=11,  w2=12,  w3=13,
-        w4=14,  w5=15,  w6=16,  w7=17,
-        w8=9,  w9=5,  w10=6, w11=7,
-        w12=28, w13=29, w14=30, w15=31,
-        w16=3, w17=4, w18=0, w19=18,
-        w20=19, w21=20, w22=21, w23=22,
-        w24=23, w25=24, w26=25, w27=26,
-        w28=27, w29=8, w30=1, wZR = 0
+        zero, ra, sp, gp,
+        tp, t0, t1, t2,
+        s0, s1, a0, a1,
+        a2, a3, a4, a5,
+        a6, a7, s2, s3,
+        s4, s5, s6, s7,
+        s8, s9, s10, s11,
+        t3, t4, t5, t6, fp=8
     };
 
-    /*enum REGISTER64
+    enum REGISTER64
     {
-        xZ, x0,  xSP,  x2, x3,
+        x0,  x1,  x2,  x3,
         x4,  x5,  x6,  x7,
         x8,  x9,  x10, x11,
         x12, x13, x14, x15,
         x16, x17, x18, x19,
         x20, x21, x22, x23,
         x24, x25, x26, x27,
-        x28, x29, x30, xZR, x1 = 31
-    };*/
-
-    enum REGISTER64
-    {
-        x0=10,  x1=11,  x2=12,  x3=13,
-        x4=14,  x5=15,  x6=16,  x7=17,
-        x8=9,   x9=5,   x10=6,  x11=7,
-        x12=28, x13=29, x14=30, x15=31,
-        x16=3,  x17=4,  x18=0,  x19=18,
-        x20=19, x21=20, x22=21, x23=22,
-        x24=23, x25=24, x26=25, x27=26,
-        x28=27, x29=8,  x30=1,  x31=2, xRA=1, xSP=2, xFP=8, xZR=0
+        x28, x29, x30, x31, xRA=1, xSP=2, xFP=8, xZR=0
     };
 
     enum REGISTERMD
@@ -252,7 +228,7 @@ public:
 
     void    Orr_16b_Mem(REGISTER64, REGISTER64, REGISTER64, REGISTER32, REGISTER32);
 
-    void    Ret(REGISTER64 = x30);
+    void    Ret(REGISTER64 = xRA);
     void    Scvtf_1s(REGISTERMD, REGISTERMD);
     void    Fcvtsw_1s(REGISTERMD rd, REGISTER32 rn);
     void    Scvtf_4s(REGISTERMD, REGISTERMD);
@@ -433,9 +409,9 @@ private:
         size_t offset = 0;
         bool cbz = false;
         bool cbz64 = false;
-        REGISTER32 cbRegister = w0;
-        REGISTER32 src1Reg = w0;
-        REGISTER32 src2Reg = w0;
+        REGISTER32 cbRegister = a0;
+        REGISTER32 src1Reg = a0;
+        REGISTER32 src2Reg = a0;
         CONDITION condition;
     };
 
