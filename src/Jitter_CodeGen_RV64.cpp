@@ -918,17 +918,17 @@ bool CCodeGen_RV64::TryGetLogicalImmParams(uint32 imm, LOGICAL_IMM_PARAMS& param
     return false;
 }
 
-uint16 CCodeGen_RV64::GetSavedRegisterList(uint32 registerUsage)
+uint32 CCodeGen_RV64::GetSavedRegisterList(uint32 registerUsage)
 {
-    uint16 registerSave = 0;
+    uint32 registerSave = 0;
     for(unsigned int i = 0; i < MAX_REGISTERS; i++)
     {
         if((1 << i) & registerUsage)
         {
-            registerSave |= (1 << (g_registers[i] / 2));
+            registerSave |= (1 << (g_registers[i]));
         }
     }
-    registerSave |= (1 << (g_baseRegister / 2));
+    registerSave |= (1 << (g_baseRegister));
     return registerSave;
 }
 
@@ -937,16 +937,22 @@ uint16 CCodeGen_RV64::GetSavedRegisterList(uint32 registerUsage)
 void CCodeGen_RV64::Emit_Prolog(const StatementList& statements, uint32 stackSize)
 {
     uint32 maxParamSpillSize = GetMaxParamSpillSize(statements);
-    m_assembler.Stp_PreIdx(CRV64Assembler::xFP, CRV64Assembler::xRA, CRV64Assembler::xSP, -16);
+    m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, -16);
+    m_assembler.Sd(CRV64Assembler::xSP, CRV64Assembler::xFP, 0);
+    m_assembler.Sd(CRV64Assembler::xSP, CRV64Assembler::xRA, 8);
+    //m_assembler.Stp_PreIdx(CRV64Assembler::xFP, CRV64Assembler::xRA, CRV64Assembler::xSP, -16);
 
     //Preserve saved registers
-    for(uint32 i = 0; i < 16; i++)
+    for(uint32 i = 0; i < 32; i++)
     {
         if(m_registerSave & (1 << i))
         {
-            auto reg0 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 0);
-            auto reg1 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 1);
-            m_assembler.Stp_PreIdx(reg0, reg1, CRV64Assembler::xSP, -16);
+            auto reg = static_cast<CRV64Assembler::REGISTER64>(i);
+            m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, -8);
+            m_assembler.Sd(CRV64Assembler::xSP, reg, 0);
+            //auto reg0 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 0);
+            //auto reg1 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 1);
+            //m_assembler.Stp_PreIdx(reg0, reg1, CRV64Assembler::xSP, -16);
         }
     }
     m_assembler.Mov_Sp(CRV64Assembler::xFP, CRV64Assembler::xSP);
@@ -968,16 +974,22 @@ void CCodeGen_RV64::Emit_Epilog()
     m_assembler.Mov_Sp(CRV64Assembler::xSP, CRV64Assembler::xFP);
 
     //Restore saved registers
-    for(int32 i = 15; i >= 0; i--)
+    for(int32 i = 31; i >= 0; i--)
     {
         if(m_registerSave & (1 << i))
         {
-            auto reg0 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 0);
-            auto reg1 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 1);
-            m_assembler.Ldp_PostIdx(reg0, reg1, CRV64Assembler::xSP, 16);
+            auto reg = static_cast<CRV64Assembler::REGISTER64>(i);
+            m_assembler.Ld(reg, CRV64Assembler::xSP, 0);
+            m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, 8);
+            //auto reg0 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 0);
+            //auto reg1 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 1);
+            //m_assembler.Ldp_PostIdx(reg0, reg1, CRV64Assembler::xSP, 16);
         }
     }
-    m_assembler.Ldp_PostIdx(CRV64Assembler::xFP, CRV64Assembler::xRA, CRV64Assembler::xSP, 16);
+    m_assembler.Ld(CRV64Assembler::xFP, CRV64Assembler::xSP, 0);
+    m_assembler.Ld(CRV64Assembler::xRA, CRV64Assembler::xSP, 8);
+    m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, 16);
+    //m_assembler.Ldp_PostIdx(CRV64Assembler::xFP, CRV64Assembler::xRA, CRV64Assembler::xSP, 16);
 }
 
 CRV64Assembler::LABEL CCodeGen_RV64::GetLabel(uint32 blockId)

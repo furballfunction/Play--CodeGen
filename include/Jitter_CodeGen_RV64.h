@@ -864,7 +864,7 @@ namespace Jitter
             static OpRegType OpReg() { return &CRV64Assembler::Sshr_4s; }
         };
 
-        uint16    GetSavedRegisterList(uint32);
+        uint32    GetSavedRegisterList(uint32);
         void      Emit_Prolog(const StatementList&, uint32);
         void      Emit_Epilog();
 
@@ -1106,7 +1106,7 @@ namespace Jitter
         ParamStack             m_params;
         uint32                 m_nextTempRegister = 0;
         uint32                 m_nextTempRegisterMd = 0;
-        uint16                 m_registerSave = 0;
+        uint32                 m_registerSave = 0;
         uint32                 m_paramSpillBase = 0;
 
         bool    m_generateRelocatableCalls = false;
