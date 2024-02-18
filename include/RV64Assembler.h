@@ -194,7 +194,7 @@ public:
     void    Ldrh(REGISTER32, REGISTER64, REGISTER64, bool);
     void    Ldrhs(REGISTER32, REGISTER64, uint32);
     void    Ldr_Pc(REGISTER64, uint32);
-    void    Ldr_Pc(REGISTERMD, const LITERAL128&);
+    void    Ldr_Pc(REGISTERMD, const LITERAL128&, REGISTER64);
     void    Ldr_1s(REGISTERMD, REGISTER64, uint32);
     void    Ldr_1q(REGISTERMD, REGISTER64, uint32);
     void    Ldr_1q(REGISTERMD, REGISTER64, REGISTER64, bool);
@@ -342,6 +342,23 @@ public:
     void    Zip2_8h(REGISTERMD, REGISTERMD, REGISTERMD);
     void    Zip2_16b(REGISTERMD, REGISTERMD, REGISTERMD);
 
+    void    Smin_1s_RVV(REGISTER32, REGISTER32, REGISTER32);
+    void    Umin_1s_RVV(REGISTER32, REGISTER32, REGISTER32);
+
+    void    Amominw(REGISTER64 rd, REGISTER64 rs1, REGISTER64 rs2);
+    void    Min(REGISTER64 rd, REGISTER64 rs1, REGISTER64 rs2);
+
+    void    Vlswv(REGISTERMD vd, REGISTER64 rs1, REGISTER64 rs2, int vm);
+    void    Vlwv(REGISTERMD vd, REGISTER64 rs1, int vm);
+    void    Vswv(REGISTERMD vs3, REGISTER64 rs1, int vm);
+    void    Vsetvli(REGISTER64 rd, REGISTER64 rs1, int vtypei);
+    void    Vextxv(REGISTER64 rd, REGISTERMD vs1, REGISTER64 rs1);
+    void    Vmvsx(REGISTERMD vd, REGISTER64 rs1);
+    void    Vminvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vminvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
+    void    Vminuvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vminuvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
+
     void    Lwu(REGISTER32 rd, REGISTER64 rs1, int32 imm);
     void    Lw(REGISTER32 rd, REGISTER64 rs1, int32 imm);
     void    Xorw(REGISTER32 rd, REGISTER32 rs1, REGISTER32 rs2);
@@ -419,6 +436,7 @@ private:
     {
         size_t offset = 0;
         uint32 rt = 0;
+        uint32 rtmp = 0;
         LITERAL128 value = LITERAL128(0, 0);
     };
 

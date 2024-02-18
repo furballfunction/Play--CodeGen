@@ -258,10 +258,26 @@ void CRV64Assembler::ResolveLiteralReferences()
         auto literalPos = static_cast<uint32>(literalPool.GetLiteralPosition(literalRef.value));
         m_stream->Seek(literalRef.offset, Framework::STREAM_SEEK_SET);
         auto offset = literalPos - literalRef.offset;
-        assert((offset & 0x03) == 0);
+        /*assert((offset & 0x03) == 0);
         assert(offset < 0x100000);
         offset /= 4;
-        m_stream->Write32(0x9C000000 | static_cast<uint32>(offset << 5) | literalRef.rt);
+        m_stream->Write32(0x9C000000 | static_cast<uint32>(offset << 5) | literalRef.rt);*/
+        //uint32 o = m_stream->Read32();
+        //auto rd = static_cast<REGISTER64>((o >> 7) & 0x1f);
+        //m_stream->Seek(literalRef.offset, Framework::STREAM_SEEK_SET);
+        auto rd = static_cast<REGISTER64>(literalRef.rtmp);
+        if (offset & 0x800) {
+            // 12th bit set
+            int32 signedLower12 = SIGN_EXTEND_12(offset);
+            Auipc(rd, ((offset-signedLower12) & 0xfffff000));
+            Addi(rd, rd, signedLower12);
+        } else {
+            Auipc(rd, (offset & 0xFFFFF000));
+            Addi(rd, rd, (offset & 0xFFF));
+        }
+
+        Vlwv(static_cast<REGISTERMD>(literalRef.rt), rd, 0);
+        //Break();
     }
     m_literal128Refs.clear();
     m_stream->Seek(0, Framework::STREAM_SEEK_END);
@@ -1881,15 +1897,18 @@ void CRV64Assembler::Ldr_Pc(REGISTER64 rt, uint32 offset)
     WriteWord(opcode);
 }
 
-void CRV64Assembler::Ldr_Pc(REGISTERMD rt, const LITERAL128& literal)
+void CRV64Assembler::Ldr_Pc(REGISTERMD rt, const LITERAL128& literal, REGISTER64 rtmp)
 {
-    assert(0);
     LITERAL128REF literalRef;
     literalRef.offset = static_cast<size_t>(m_stream->Tell());
     literalRef.value = literal;
     literalRef.rt = rt;
+    literalRef.rtmp = rtmp;
     m_literal128Refs.push_back(literalRef);
     WriteWord(0);
+    WriteWord(0);
+    WriteWord(0);
+    Addi(xZR, xZR, 0);
 }
 
 void CRV64Assembler::Ldr_1s(REGISTERMD rt, REGISTER64 rn, uint32 offset)
@@ -2382,6 +2401,14 @@ void CRV64Assembler::Shl_8h(REGISTERMD rd, REGISTERMD rn, uint8 sa)
 
 void CRV64Assembler::Smin_1s(REGISTER32 rd, REGISTER32 rn, REGISTER32 rm)
 {
+    //Min(static_cast<REGISTER64>(rd), static_cast<REGISTER64>(rn), static_cast<REGISTER64>(rm));
+    /*Addi(static_cast<REGISTER64>(extra), xZR, 0);
+    Vsetvli(xZR, xZR, 8);
+    Vmvsx(v0, static_cast<REGISTER64>(rn));
+    Vminvx(v0, v0, static_cast<REGISTER64>(rm), 0);
+    Vextxv(static_cast<REGISTER64>(extra), v0, x0);
+    Addiw(extra, extra, 0);*/
+
     uint16 offset = 2*4;
     // bge
     uint32 opcode = 0x00005063;
@@ -2395,6 +2422,9 @@ void CRV64Assembler::Smin_1s(REGISTER32 rd, REGISTER32 rn, REGISTER32 rm)
 
     //Add(rd, rm, 0, ADDSUB_IMM_SHIFT_LSL0);
     Addiw(rd, rm, 0);
+
+    /*Beq(static_cast<REGISTER64>(rd), static_cast<REGISTER64>(extra), 2*4);
+    Break();*/
 }
 
 void CRV64Assembler::Umin_1s(REGISTER32 rd, REGISTER32 rn, REGISTER32 rm)
@@ -4026,4 +4056,156 @@ void CRV64Assembler::WriteWord(uint32 value)
 {
     //assert((value != 0));
     m_stream->Write32(value);
+}
+
+
+
+void CRV64Assembler::Smin_1s_RVV(REGISTER32 rd, REGISTER32 rn, REGISTER32 rm)
+{
+    /*for (int i=0; i<32; i++) {
+        Addiw(rd, zero, i);
+        Vmvsx(static_cast<REGISTERMD>(i), static_cast<REGISTER64>(rd));
+    }
+    Break();*/
+    Vsetvli(xZR, xZR, 8);
+    Vmvsx(v0, static_cast<REGISTER64>(rn));
+    Vminvx(v0, v0, static_cast<REGISTER64>(rm), 0);
+    Vextxv(static_cast<REGISTER64>(rd), v0, x0);
+    Addiw(rd, rd, 0);
+}
+
+void CRV64Assembler::Umin_1s_RVV(REGISTER32 rd, REGISTER32 rn, REGISTER32 rm)
+{
+    Vsetvli(xZR, xZR, 8);
+    Vmvsx(v0, static_cast<REGISTER64>(rn));
+    Vminuvx(v0, v0, static_cast<REGISTER64>(rm), 0);
+    Vextxv(static_cast<REGISTER64>(rd), v0, x0);
+    Addiw(rd, rd, 0);
+}
+
+
+/*
+ * R Format Atomic Instructions:
+ */
+
+// RV32A
+void CRV64Assembler::Amominw(REGISTER64 rd, REGISTER64 rs1, REGISTER64 rs2)
+{
+    WriteR(0x8000202F, rd, rs1, rs2);
+}
+
+void CRV64Assembler::Min(REGISTER64 rd, REGISTER64 rs1, REGISTER64 rs2)
+{
+    WriteR(0x0A004033, rd, rs1, rs2);
+}
+
+
+
+void CRV64Assembler::Vlswv(REGISTERMD vd, REGISTER64 rs1, REGISTER64 rs2, int vm2) {
+    uint32 opcode = 0x00000007;
+    //vm = 0x120;
+    uint32 width = 6; // vector word
+    uint32 lumop_rs2_vs2 = rs2;
+    uint32 vm = 1; // unmasked
+    uint32 mop = 6; // sign-extended strided
+    uint32 nf = 0;
+    //uint32 opcode = 0x12006007;
+    opcode |= (vd << 7);
+    opcode |= (width << 12);
+    opcode |= (rs1 << 15);
+    opcode |= (lumop_rs2_vs2 << 20);
+    opcode |= (vm << 25);
+    opcode |= (mop << 26);
+    opcode |= (nf << 29);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vlwv(REGISTERMD vd, REGISTER64 rs1, int vm2) {
+    uint32 opcode = 0x00000007;
+    //vm = 0x120;
+    uint32 width = 6; // vector word
+    uint32 lumop_rs2_vs2 = 0;
+    uint32 vm = 1; // unmasked
+    uint32 mop = 4; // sign-extended unit-stride
+    uint32 nf = 0;
+    //uint32 opcode = 0x12006007;
+    opcode |= (vd << 7);
+    opcode |= (width << 12);
+    opcode |= (rs1 << 15);
+    opcode |= (lumop_rs2_vs2 << 20);
+    opcode |= (vm << 25);
+    opcode |= (mop << 26);
+    opcode |= (nf << 29);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vswv(REGISTERMD vs3, REGISTER64 rs1, int vm) {
+    uint32 opcode = 0x02006027;
+    opcode |= (vs3 << 7);
+    opcode |= (rs1 << 15);
+    opcode |= (vm << 20);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vsetvli(REGISTER64 rd, REGISTER64 rs1, int vtypei) {
+    // vsetvli zero, a0, e32
+    uint32 opcode = 0x00007057;
+    opcode |= (rd << 7);
+    opcode |= (rs1 << 15);
+    opcode |= (vtypei << 20);
+    WriteWord(opcode);
+    //WriteWord(0x00857057);
+}
+
+void CRV64Assembler::Vextxv(REGISTER64 rd, REGISTERMD vs1, REGISTER64 rs1) {
+    // vext.x.v a1, v0, x0
+    uint32 opcode = 0x32002057;
+    opcode |= (rd << 7);
+    opcode |= (vs1 << 20);
+    opcode |= (rs1 << 15);
+    WriteWord(opcode);
+    //WriteWord(0x320025d7);
+}
+
+void CRV64Assembler::Vmvsx(REGISTERMD vd, REGISTER64 rs1) {
+    // vmv.s.x v0, a1
+    uint32 opcode = 0x36006057;
+    opcode |= (vd << 7);
+    opcode |= (rs1 << 15);
+    WriteWord(opcode);
+    //WriteWord(0x3605e057);
+}
+
+void CRV64Assembler::Vminvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x16000057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vminvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm) {
+    // vmin.vx v0, v0, a2
+    uint32 opcode = 0x16004057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (rs1 << 15);
+    WriteWord(opcode);
+    //WriteWord(0x16064057);
+}
+
+void CRV64Assembler::Vminuvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x12000057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vminuvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm) {
+    uint32 opcode = 0x12004057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (rs1 << 15);
+    WriteWord(opcode);
 }

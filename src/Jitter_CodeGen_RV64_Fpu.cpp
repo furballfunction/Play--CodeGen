@@ -173,12 +173,42 @@ void CCodeGen_RV64::Emit_Fp_Clamp_MemMem(const STATEMENT& statement)
     //m_assembler.Smin_4s(resultReg, resultReg, cst1Reg);
     //m_assembler.Umin_4s(resultReg, resultReg, cst2Reg);
 
+    if (false) {
+        auto result2Reg = GetNextTempRegisterMd();
+        auto tmp2Reg = GetNextTempRegister();
+        m_assembler.Addiw(tmp2Reg, CRV64Assembler::zero, 1);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), 8);
+        LoadMemoryFpSingleInRegisterRVV(result2Reg, src1);
+        //m_assembler.Vmvsx(CRV64Assembler::v0, static_cast<CRV64Assembler::REGISTER64>(tmpReg));
+        //m_assembler.Vminvx(CRV64Assembler::v0, CRV64Assembler::v0, static_cast<CRV64Assembler::REGISTER64>(cst1Reg), 0);
+        //m_assembler.Vextxv(static_cast<CRV64Assembler::REGISTER64>(tmpReg), CRV64Assembler::v0, CRV64Assembler::x0);
+        //m_assembler.Addiw(tmpReg, tmpReg, 0);
+        m_assembler.Vminvx(result2Reg, result2Reg, static_cast<CRV64Assembler::REGISTER64>(cst1Reg), 0);
+        m_assembler.Vminuvx(result2Reg, result2Reg, static_cast<CRV64Assembler::REGISTER64>(cst2Reg), 0);
+        StoreRegisterInMemoryFpSingleRVV(dst, result2Reg);
+        //LoadMemoryFpSingleInRegister(result2Reg, dst);
+        //m_assembler.Fmv_x_w(tmp2Reg, result2Reg);
+        //m_assembler.Vextxv(static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), result2Reg, CRV64Assembler::x0);
+        //m_assembler.Addiw(tmp2Reg, tmp2Reg, 0);
+        return;
+    }
+
     LoadMemoryFpSingleInRegister(resultReg, src1);
+
     m_assembler.Fmv_x_w(tmpReg, resultReg);
 
+    /*if (m_thead_extentions) {
+        m_assembler.Smin_1s_RVV(tmpReg, tmpReg, cst1Reg);
+        m_assembler.Umin_1s_RVV(tmpReg, tmpReg, cst2Reg);
+    } else {*/
     m_assembler.Smin_1s(tmpReg, tmpReg, cst1Reg);
     m_assembler.Umin_1s(tmpReg, tmpReg, cst2Reg);
+    //}
     m_assembler.Fmv_1s(resultReg, tmpReg);
+
+    //m_assembler.Beq(static_cast<CRV64Assembler::REGISTER64>(tmpReg), static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), 2*4);
+    //m_assembler.Break();
+
     StoreRegisterInMemoryFpSingle(dst, resultReg);
 }
 

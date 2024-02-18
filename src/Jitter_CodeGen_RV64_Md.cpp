@@ -1,4 +1,5 @@
 #include "Jitter_CodeGen_RV64.h"
+#include <stdexcept>
 
 // ???
 uint64 m_stackLevel = 0;
@@ -807,9 +808,96 @@ void CCodeGen_RV64::Emit_Md_ClampS_MemMem(const STATEMENT& statement)
     //m_assembler.Vmin_U32(dstReg, dstReg, cst1Reg);
     //m_assembler.Vst1_32x4(dstReg, dstAddrReg);
 
+#if 0
+    //auto result2Reg = CRV64Assembler::v0;
+    auto result2Reg = GetNextTempRegisterMd();
+    auto tmp2Reg = GetNextTempRegister();
+    auto tmpAddr2Reg = GetNextTempRegister64();
+
+    auto cst1Reg2 = GetNextTempRegisterMd();
+	auto cst2Reg2 = GetNextTempRegisterMd();
+
+    if (true) {
+        m_assembler.Addiw(tmp2Reg, CRV64Assembler::zero, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), 8);
+        m_assembler.Ldr_Pc(cst1Reg2, g_fpClampMask1, tmpAddr2Reg);
+        m_assembler.Vlwv(result2Reg, src1AddrReg, 0);
+        //LoadMemoryFpSingleInRegisterRVV(result2Reg, src1);
+        m_assembler.Vminvv(result2Reg, result2Reg, cst1Reg2, 0);
+        m_assembler.Ldr_Pc(cst2Reg2, g_fpClampMask2, tmpAddr2Reg);
+        m_assembler.Vminuvv(result2Reg, result2Reg, cst2Reg2, 0);
+        m_assembler.Vswv(result2Reg, dstAddrReg, 0);
+        //StoreRegisterInMemoryFpSingleRVV(dst, result2Reg);
+        //m_assembler.Break();
+        return;
+#if 0
+        /*m_assembler.Addiw(tmp2Reg, CRV64Assembler::zero, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), 8);
+        LoadMemoryFpSingleInRegisterRVV(result2Reg, src1);*/
+        //m_assembler.Vmvsx(CRV64Assembler::v0, static_cast<CRV64Assembler::REGISTER64>(tmpReg));
+        //m_assembler.Vminvx(CRV64Assembler::v0, CRV64Assembler::v0, static_cast<CRV64Assembler::REGISTER64>(cst1Reg), 0);
+        //m_assembler.Vextxv(static_cast<CRV64Assembler::REGISTER64>(tmpReg), CRV64Assembler::v0, CRV64Assembler::x0);
+        //m_assembler.Addiw(tmpReg, tmpReg, 0);
+        //m_assembler.Addiw(tmp2Reg, CRV64Assembler::zero, 4);
+        //m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), 8);
+        //LoadMemoryFpSingleInRegisterRVV(result2Reg, src1);
+        m_assembler.Addiw(tmp2Reg, CRV64Assembler::zero, 1);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), 8);
+        for (int i=0; i<4; i++) {
+            m_assembler.Addi(tmpAddr2Reg, src1AddrReg, i*4);
+            m_assembler.Vlwv(result2Reg, tmpAddr2Reg, 0);
+            m_assembler.Vminvx(static_cast<CRV64Assembler::REGISTERMD>((result2Reg*4)+i), static_cast<CRV64Assembler::REGISTERMD>((result2Reg*4)+i), static_cast<CRV64Assembler::REGISTER64>(cst1Reg), 0);
+            m_assembler.Vminuvx(static_cast<CRV64Assembler::REGISTERMD>((result2Reg*4)+i), static_cast<CRV64Assembler::REGISTERMD>((result2Reg*4)+i), static_cast<CRV64Assembler::REGISTER64>(cst2Reg), 0);
+            //StoreRegisterInMemoryFpSingleRVV(dst, result2Reg);
+            m_assembler.Addi(tmpAddr2Reg, dstAddrReg, i*4);
+            m_assembler.Vswv(result2Reg, tmpAddr2Reg, 0);
+        }
+        /*m_assembler.Addiw(tmp2Reg, CRV64Assembler::zero, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), 8);
+        StoreRegisterInMemoryFpSingleRVV(dst, result2Reg);*/
+        //LoadMemoryFpSingleInRegister(result2Reg, dst);
+        //m_assembler.Fmv_x_w(tmp2Reg, result2Reg);
+        //m_assembler.Vextxv(static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), result2Reg, CRV64Assembler::x0);
+        //m_assembler.Addiw(tmp2Reg, tmp2Reg, 0);
+        return;
+#endif
+#if 0
+        m_assembler.Addiw(tmp2Reg, CRV64Assembler::zero, 1);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), 8);
+        m_assembler.Vmvsx(static_cast<CRV64Assembler::REGISTERMD>(result2Reg+4), static_cast<CRV64Assembler::REGISTER64>(cst1Reg));
+        m_assembler.Vmvsx(static_cast<CRV64Assembler::REGISTERMD>(result2Reg+4+1), static_cast<CRV64Assembler::REGISTER64>(cst1Reg));
+        m_assembler.Vmvsx(static_cast<CRV64Assembler::REGISTERMD>(result2Reg+4+2), static_cast<CRV64Assembler::REGISTER64>(cst1Reg));
+        m_assembler.Vmvsx(static_cast<CRV64Assembler::REGISTERMD>(result2Reg+4+3), static_cast<CRV64Assembler::REGISTER64>(cst1Reg));
+        m_assembler.Vmvsx(static_cast<CRV64Assembler::REGISTERMD>(result2Reg+4+4), static_cast<CRV64Assembler::REGISTER64>(cst2Reg));
+        m_assembler.Vmvsx(static_cast<CRV64Assembler::REGISTERMD>(result2Reg+4+5), static_cast<CRV64Assembler::REGISTER64>(cst2Reg));
+        m_assembler.Vmvsx(static_cast<CRV64Assembler::REGISTERMD>(result2Reg+4+6), static_cast<CRV64Assembler::REGISTER64>(cst2Reg));
+        m_assembler.Vmvsx(static_cast<CRV64Assembler::REGISTERMD>(result2Reg+4+7), static_cast<CRV64Assembler::REGISTER64>(cst2Reg));
+
+        m_assembler.Addiw(tmp2Reg, CRV64Assembler::zero, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), 8);
+        LoadMemoryFpSingleInRegisterRVV(result2Reg, src1);
+        //m_assembler.Vmvsx(CRV64Assembler::v0, static_cast<CRV64Assembler::REGISTER64>(tmpReg));
+        //m_assembler.Vminvx(CRV64Assembler::v0, CRV64Assembler::v0, static_cast<CRV64Assembler::REGISTER64>(cst1Reg), 0);
+        //m_assembler.Vextxv(static_cast<CRV64Assembler::REGISTER64>(tmpReg), CRV64Assembler::v0, CRV64Assembler::x0);
+        //m_assembler.Addiw(tmpReg, tmpReg, 0);
+        m_assembler.Vminvv(result2Reg, result2Reg, static_cast<CRV64Assembler::REGISTERMD>(result2Reg+1), 0);
+        m_assembler.Vminuvv(result2Reg, result2Reg, static_cast<CRV64Assembler::REGISTERMD>(result2Reg+2), 0);
+        StoreRegisterInMemoryFpSingleRVV(dst, result2Reg);
+        //LoadMemoryFpSingleInRegister(result2Reg, dst);
+        //m_assembler.Fmv_x_w(tmp2Reg, result2Reg);
+        //m_assembler.Vextxv(static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), result2Reg, CRV64Assembler::x0);
+        //m_assembler.Addiw(tmp2Reg, tmp2Reg, 0);
+        return;
+#endif
+    }
+#endif
     for (int i=0; i<16; i+=4) {
         m_assembler.Lw(tmpReg, src1AddrReg, i);
+        /*if (m_thead_extentions) {
+            m_assembler.Smin_1s_RVV(tmpReg, tmpReg, cst1Reg);
+        } else {*/
         m_assembler.Smin_1s(tmpReg, tmpReg, cst1Reg);
+        //}
         m_assembler.Umin_1s(tmpReg, tmpReg, cst2Reg);
         m_assembler.Str(tmpReg, dstAddrReg, i);
     }
@@ -1452,7 +1540,7 @@ CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_mdConstMatchersMem[] =
     { OP_MOV,                   MATCH_REGISTER128,    MATCH_REGISTER128,    MATCH_NIL,              MATCH_NIL, &CCodeGen_RV64::Emit_Md_Mov_RegReg                            },
     { OP_MOV,                   MATCH_REGISTER128,    MATCH_MEMORY128,      MATCH_NIL,              MATCH_NIL, &CCodeGen_RV64::Emit_Md_Mov_RegMem                            },
     { OP_MOV,                   MATCH_MEMORY128,      MATCH_REGISTER128,    MATCH_NIL,              MATCH_NIL, &CCodeGen_RV64::Emit_Md_Mov_MemReg                            },
-    { OP_MOV,                   MATCH_MEMORY128,      MATCH_MEMORY128,      MATCH_NIL,              MATCH_NIL, &CCodeGen_RV64::Emit_Md_Mov_MemMem                            },
+    { OP_MOV,                   MATCH_MEMORY128,      MATCH_MEMORY128,      MATCH_NIL,              MATCH_NIL, &CCodeGen_RV64::Emit_Md_Mov_MemMem_RVV                        },
 
     { OP_MERGETO256,            MATCH_MEMORY256,      MATCH_VARIABLE128,    MATCH_VARIABLE128,      MATCH_NIL, &CCodeGen_RV64::Emit_MergeTo256_MemVarVar                     },
 
