@@ -1440,7 +1440,589 @@ CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_mdConstMatchersMem[] =
 
 };
 
-/*CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_mdConstMatchersRVV[] =
+void CCodeGen_RV64::LoadMemoryFpSingleInRegisterRVV(CRV64Assembler::REGISTERMD reg, CSymbol* symbol)
+{
+    auto tmpReg = GetNextTempRegister64();
+    switch(symbol->m_type)
+    {
+    case SYM_FP_REL_SINGLE:
+        m_assembler.Addi(tmpReg, g_baseRegister, symbol->m_valueLow);
+        m_assembler.Vlwv(reg, tmpReg, 0);
+        break;
+    case SYM_FP_TMP_SINGLE:
+        m_assembler.Addi(tmpReg, CRV64Assembler::xSP, symbol->m_stackLocation);
+        m_assembler.Vlwv(reg, CRV64Assembler::xSP, 0);
+        break;
+    default:
+        assert(false);
+        break;
+    }
+}
+
+void CCodeGen_RV64::StoreRegisterInMemoryFpSingleRVV(CSymbol* symbol, CRV64Assembler::REGISTERMD reg)
+{
+    auto tmpReg = GetNextTempRegister64();
+    switch(symbol->m_type)
+    {
+    case SYM_FP_REL_SINGLE:
+        m_assembler.Addi(tmpReg, g_baseRegister, symbol->m_valueLow);
+        m_assembler.Vswv(reg, tmpReg, 0);
+        break;
+    case SYM_FP_TMP_SINGLE:
+        m_assembler.Addi(tmpReg, CRV64Assembler::xSP, symbol->m_stackLocation);
+        m_assembler.Vswv(reg, tmpReg, 0);
+        break;
+    default:
+        assert(false);
+        break;
+    }
+}
+
+void CCodeGen_RV64::LoadMemory128InRegister(CRV64Assembler::REGISTERMD dstReg, CSymbol* symbol)
+{
+	switch(symbol->m_type)
+	{
+	case SYM_RELATIVE128:
+		m_assembler.Ldr_1q(dstReg, g_baseRegister, symbol->m_valueLow);
+		break;
+	case SYM_TEMPORARY128:
+		m_assembler.Ldr_1q(dstReg, CRV64Assembler::xSP, symbol->m_stackLocation);
+		break;
+	default:
+		assert(0);
+		break;
+	}
+}
+
+void CCodeGen_RV64::StoreRegisterInMemory128(CSymbol* symbol, CRV64Assembler::REGISTERMD srcReg)
+{
+	switch(symbol->m_type)
+	{
+	case SYM_RELATIVE128:
+		m_assembler.Str_1q(srcReg, g_baseRegister, symbol->m_valueLow);
+		break;
+	case SYM_TEMPORARY128:
+		m_assembler.Str_1q(srcReg, CRV64Assembler::xSP, symbol->m_stackLocation);
+		break;
+	default:
+		assert(0);
+		break;
+	}
+}
+
+/*void CCodeGen_RV64::LoadMemory128AddressInRegister(CRV64Assembler::REGISTER64 dstReg, CSymbol* symbol, uint32 offset)
+{
+	switch(symbol->m_type)
+	{
+	case SYM_RELATIVE128:
+		LoadRelative128AddressInRegister(dstReg, symbol, offset);
+		break;
+	case SYM_TEMPORARY128:
+		LoadTemporary128AddressInRegister(dstReg, symbol, offset);
+		break;
+	default:
+		assert(0);
+		break;
+	}
+}
+
+void CCodeGen_RV64::LoadRelative128AddressInRegister(CRV64Assembler::REGISTER64 dstReg, CSymbol* symbol, uint32 offset)
+{
+	assert(symbol->m_type == SYM_RELATIVE128);
+
+	uint32 totalOffset = symbol->m_valueLow + offset;
+	assert(totalOffset < 0x1000);
+	m_assembler.Add(dstReg, g_baseRegister, totalOffset, CRV64Assembler::ADDSUB_IMM_SHIFT_LSL0);
+}
+
+void CCodeGen_RV64::LoadTemporary128AddressInRegister(CRV64Assembler::REGISTER64 dstReg, CSymbol* symbol, uint32 offset)
+{
+	assert(symbol->m_type == SYM_TEMPORARY128);
+
+	uint32 totalOffset = symbol->m_stackLocation + offset;
+	assert(totalOffset < 0x1000);
+	m_assembler.Add(dstReg, CRV64Assembler::xSP, totalOffset, CRV64Assembler::ADDSUB_IMM_SHIFT_LSL0);
+}
+
+void CCodeGen_RV64::LoadTemporary256ElementAddressInRegister(CRV64Assembler::REGISTER64 dstReg, CSymbol* symbol, uint32 offset)
+{
+	assert(symbol->m_type == SYM_TEMPORARY256);
+
+	uint32 totalOffset = symbol->m_stackLocation + offset;
+	assert(totalOffset < 0x1000);
+	m_assembler.Add(dstReg, CRV64Assembler::xSP, totalOffset, CRV64Assembler::ADDSUB_IMM_SHIFT_LSL0);
+}*/
+
+CRV64Assembler::REGISTERMD CCodeGen_RV64::PrepareSymbolRegisterDefMd(CSymbol* symbol, CRV64Assembler::REGISTERMD preferedRegister)
+{
+	switch(symbol->m_type)
+	{
+	case SYM_REGISTER128:
+		assert(symbol->m_valueLow < MAX_MDREGISTERS);
+		return g_registersMd[symbol->m_valueLow];
+		break;
+	case SYM_TEMPORARY128:
+	case SYM_RELATIVE128:
+		return preferedRegister;
+		break;
+	default:
+		throw std::runtime_error("Invalid symbol type.");
+		break;
+	}
+}
+
+CRV64Assembler::REGISTERMD CCodeGen_RV64::PrepareSymbolRegisterUseMd(CSymbol* symbol, CRV64Assembler::REGISTERMD preferedRegister)
+{
+	switch(symbol->m_type)
+	{
+	case SYM_REGISTER128:
+		assert(symbol->m_valueLow < MAX_MDREGISTERS);
+		return g_registersMd[symbol->m_valueLow];
+		break;
+	case SYM_TEMPORARY128:
+	case SYM_RELATIVE128:
+		LoadMemory128InRegister(preferedRegister, symbol);
+		return preferedRegister;
+		break;
+	default:
+		throw std::runtime_error("Invalid symbol type.");
+		break;
+	}
+}
+
+void CCodeGen_RV64::CommitSymbolRegisterMd(CSymbol* symbol, CRV64Assembler::REGISTERMD usedRegister)
+{
+	switch(symbol->m_type)
+	{
+	case SYM_REGISTER128:
+		assert(usedRegister == g_registersMd[symbol->m_valueLow]);
+		break;
+	case SYM_TEMPORARY128:
+	case SYM_RELATIVE128:
+		StoreRegisterInMemory128(symbol, usedRegister);
+		break;
+	default:
+		throw std::runtime_error("Invalid symbol type.");
+		break;
+	}
+}
+
+template <typename MDOP>
+void CCodeGen_RV64::Emit_Md_VarVar(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+	auto src1Reg = PrepareSymbolRegisterUseMd(src1, GetNextTempRegisterMd());
+
+	((m_assembler).*(MDOP::OpReg()))(dstReg, src1Reg);
+
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+template <typename MDOP>
+void CCodeGen_RV64::Emit_Md_VarVarVar(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+	
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+	auto src1Reg = PrepareSymbolRegisterUseMd(src1, GetNextTempRegisterMd());
+	auto src2Reg = PrepareSymbolRegisterUseMd(src2, GetNextTempRegisterMd());
+
+	((m_assembler).*(MDOP::OpReg()))(dstReg, src1Reg, src2Reg);
+
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+template <typename MDOP>
+void CCodeGen_RV64::Emit_Md_VarVarVarRev(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+	
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+	auto src1Reg = PrepareSymbolRegisterUseMd(src1, GetNextTempRegisterMd());
+	auto src2Reg = PrepareSymbolRegisterUseMd(src2, GetNextTempRegisterMd());
+
+	((m_assembler).*(MDOP::OpReg()))(dstReg, src2Reg, src1Reg);
+
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+template <typename MDSHIFTOP>
+void CCodeGen_RV64::Emit_Md_Shift_VarVarCst(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+	auto src1Reg = PrepareSymbolRegisterUseMd(src1, GetNextTempRegisterMd());
+
+	((m_assembler).*(MDSHIFTOP::OpReg()))(dstReg, src1Reg, src2->m_valueLow);
+
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+void CCodeGen_RV64::Emit_Md_ClampS_VarVar(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+	auto src1Reg = PrepareSymbolRegisterUseMd(src1, GetNextTempRegisterMd());
+	auto cst1Reg = GetNextTempRegisterMd();
+	auto cst2Reg = GetNextTempRegisterMd();
+
+	//m_assembler.Ldr_Pc(cst1Reg, g_fpClampMask1);
+	//m_assembler.Ldr_Pc(cst2Reg, g_fpClampMask2);
+
+	m_assembler.Smin_4s(dstReg, src1Reg, cst1Reg);
+	m_assembler.Umin_4s(dstReg, dstReg, cst2Reg);
+	
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+void CCodeGen_RV64::Emit_Md_MakeSz_VarVar(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	
+	m_nextTempRegisterMd = 0;
+	
+	auto dstReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
+	auto src1Reg = PrepareSymbolRegisterUseMd(src1, GetNextTempRegisterMd());
+
+	auto signReg = GetNextTempRegisterMd();
+	auto zeroReg = GetNextTempRegisterMd();
+	auto cstReg = GetNextTempRegisterMd();
+	
+	assert(zeroReg == signReg + 1);
+	
+	m_assembler.Cmltz_4s(signReg, src1Reg);
+	m_assembler.Fcmeqz_4s(zeroReg, src1Reg);
+	
+	LITERAL128 lit1(0x0004080C1014181CUL, 0xFFFFFFFFFFFFFFFFUL);
+	LITERAL128 lit2(0x8040201008040201UL, 0x0000000000000000UL);
+
+	//m_assembler.Ldr_Pc(cstReg, lit1);
+	m_assembler.Tbl(signReg, signReg, cstReg);
+	//m_assembler.Ldr_Pc(cstReg, lit2);
+	m_assembler.And_16b(signReg, signReg, cstReg);
+	m_assembler.Uaddlv_16b(signReg, signReg);
+	m_assembler.Umov_1s(dstReg, signReg, 0);
+	
+	CommitSymbolRegister(dst, dstReg);
+}
+
+void CCodeGen_RV64::Emit_Md_Mov_RegReg(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	
+	assert(!dst->Equals(src1));
+	
+	m_assembler.Mov(g_registersMd[dst->m_valueLow], g_registersMd[src1->m_valueLow]);
+}
+
+void CCodeGen_RV64::Emit_Md_Mov_RegMem(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	
+	LoadMemory128InRegister(g_registersMd[dst->m_valueLow], src1);
+}
+
+void CCodeGen_RV64::Emit_Md_Mov_MemReg(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	
+	StoreRegisterInMemory128(dst, g_registersMd[src1->m_valueLow]);
+}
+
+void CCodeGen_RV64::Emit_Md_Mov_MemMem_RVV(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+
+	auto tmpReg = GetNextTempRegisterMd();
+	
+	LoadMemory128InRegister(tmpReg, src1);
+	StoreRegisterInMemory128(dst, tmpReg);
+}
+
+void CCodeGen_RV64::Emit_Md_LoadFromRef_VarVar(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+
+	auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+
+	m_assembler.Ldr_1q(dstReg, addressReg, 0);
+
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+void CCodeGen_RV64::Emit_Md_LoadFromRef_VarVarAny(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+	uint8 scale = static_cast<uint8>(statement.jmpCondition);
+
+	assert(scale == 1);
+
+	auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+
+	if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex < 0x10000))
+	{
+		m_assembler.Ldr_1q(dstReg, addressReg, scaledIndex);
+	}
+	else
+	{
+		auto indexReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
+		m_assembler.Ldr_1q(dstReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 0x10));
+	}
+
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+void CCodeGen_RV64::Emit_Md_StoreAtRef_VarVar(const STATEMENT& statement)
+{
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+
+	auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
+	auto valueReg = PrepareSymbolRegisterUseMd(src2, GetNextTempRegisterMd());
+
+	m_assembler.Str_1q(valueReg, addressReg, 0);
+}
+
+void CCodeGen_RV64::Emit_Md_StoreAtRef_VarAnyVar(const STATEMENT& statement)
+{
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+	auto src3 = statement.src3->GetSymbol().get();
+	uint8 scale = static_cast<uint8>(statement.jmpCondition);
+
+	assert(scale == 1);
+
+	auto addressReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
+	auto valueReg = PrepareSymbolRegisterUseMd(src3, GetNextTempRegisterMd());
+
+	if(uint32 scaledIndex = (src2->m_valueLow * scale); src2->IsConstant() && (scaledIndex < 0x10000))
+	{
+		m_assembler.Str_1q(valueReg, addressReg, scaledIndex);
+	}
+	else
+	{
+		auto indexReg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
+		m_assembler.Str_1q(valueReg, addressReg, static_cast<CRV64Assembler::REGISTER64>(indexReg), (scale == 0x10));
+	}
+}
+
+void CCodeGen_RV64::Emit_Md_MovMasked_VarVarVar(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+
+	assert(dst->Equals(src1));
+
+	auto mask = static_cast<uint8>(statement.jmpCondition);
+
+	auto src1Reg = PrepareSymbolRegisterUseMd(src1, GetNextTempRegisterMd());
+	auto src2Reg = PrepareSymbolRegisterUseMd(src2, GetNextTempRegisterMd());
+	
+	for(unsigned int i = 0; i < 4; i++)
+	{
+		if(mask & (1 << i))
+		{
+			m_assembler.Ins_1s(src1Reg, i, src2Reg, i);
+		}
+	}
+
+	//This is only valid if dst == src1
+	CommitSymbolRegisterMd(dst, src1Reg);
+}
+
+void CCodeGen_RV64::Emit_Md_Expand_VarReg(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+
+	m_assembler.Dup_4s(dstReg, g_registers[src1->m_valueLow]);
+
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+void CCodeGen_RV64::Emit_Md_Expand_VarMem(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+	auto src1Reg = GetNextTempRegister();
+
+	LoadMemoryInRegister(src1Reg, src1);
+
+	m_assembler.Dup_4s(dstReg, src1Reg);
+
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+void CCodeGen_RV64::Emit_Md_Expand_VarCst(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+	auto src1Reg = GetNextTempRegister();
+
+	if(src1->m_valueLow == 0)
+	{
+		m_assembler.Eor_16b(dstReg, dstReg, dstReg);
+	}
+	else
+	{
+		LoadConstantInRegister(src1Reg, src1->m_valueLow);
+		m_assembler.Dup_4s(dstReg, src1Reg);
+	}
+
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+void CCodeGen_RV64::Emit_Md_PackHB_VarVarVar(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+	auto src1Reg = PrepareSymbolRegisterUseMd(src1, GetNextTempRegisterMd());
+	auto src2Reg = PrepareSymbolRegisterUseMd(src2, GetNextTempRegisterMd());
+	
+	if(dstReg == src1Reg)
+	{
+		auto tmpReg = GetNextTempRegisterMd();
+		m_assembler.Xtn1_8b(tmpReg, src2Reg);
+		m_assembler.Xtn2_16b(tmpReg, src1Reg);
+		m_assembler.Mov(dstReg, tmpReg);
+	}
+	else
+	{
+		m_assembler.Xtn1_8b(dstReg, src2Reg);
+		m_assembler.Xtn2_16b(dstReg, src1Reg);
+	}
+	
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+void CCodeGen_RV64::Emit_Md_PackWH_VarVarVar(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+	auto src1Reg = PrepareSymbolRegisterUseMd(src1, GetNextTempRegisterMd());
+	auto src2Reg = PrepareSymbolRegisterUseMd(src2, GetNextTempRegisterMd());
+
+	if(dstReg == src1Reg)
+	{
+		auto tmpReg = GetNextTempRegisterMd();
+		m_assembler.Xtn1_4h(tmpReg, src2Reg);
+		m_assembler.Xtn2_8h(tmpReg, src1Reg);
+		m_assembler.Mov(dstReg, tmpReg);
+	}
+	else
+	{
+		m_assembler.Xtn1_4h(dstReg, src2Reg);
+		m_assembler.Xtn2_8h(dstReg, src1Reg);
+	}
+
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+void CCodeGen_RV64::Emit_MergeTo256_MemVarVar(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+
+	assert(dst->m_type == SYM_TEMPORARY256);
+
+	auto dstLoAddrReg = GetNextTempRegister64();
+	auto dstHiAddrReg = GetNextTempRegister64();
+	auto src1Reg = PrepareSymbolRegisterUseMd(src1, GetNextTempRegisterMd());
+	auto src2Reg = PrepareSymbolRegisterUseMd(src2, GetNextTempRegisterMd());
+
+	LoadTemporary256ElementAddressInRegister(dstLoAddrReg, dst, 0x00);
+	LoadTemporary256ElementAddressInRegister(dstHiAddrReg, dst, 0x10);
+
+	m_assembler.St1_4s(src1Reg, dstLoAddrReg);
+	m_assembler.St1_4s(src2Reg, dstHiAddrReg);
+}
+
+void CCodeGen_RV64::Emit_Md_Srl256_VarMemCst(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+
+	assert(src1->m_type == SYM_TEMPORARY256);
+	assert(src2->m_type == SYM_CONSTANT);
+
+	auto src1AddrReg = GetNextTempRegister64();
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+
+	uint32 offset = (src2->m_valueLow & 0x7F) / 8;
+	LoadTemporary256ElementAddressInRegister(src1AddrReg, src1, offset);
+
+	m_assembler.Ld1_4s(dstReg, src1AddrReg);
+	
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+void CCodeGen_RV64::Emit_Md_Srl256_VarMemVar(const STATEMENT& statement)
+{
+	auto dst = statement.dst->GetSymbol().get();
+	auto src1 = statement.src1->GetSymbol().get();
+	auto src2 = statement.src2->GetSymbol().get();
+
+	assert(src1->m_type == SYM_TEMPORARY256);
+
+	auto offsetRegister = GetNextTempRegister();
+	auto src1AddrReg = GetNextTempRegister64();
+	auto src2Register = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
+
+	auto dstReg = PrepareSymbolRegisterDefMd(dst, GetNextTempRegisterMd());
+
+	LoadTemporary256ElementAddressInRegister(src1AddrReg, src1, 0);
+
+	//Compute offset and modify address
+	LOGICAL_IMM_PARAMS logicalImmParams;
+	FRAMEWORK_MAYBE_UNUSED bool result = TryGetLogicalImmParams(0x7F, logicalImmParams);
+	assert(result);
+	//m_assembler.And(offsetRegister, src2Register, logicalImmParams.n, logicalImmParams.immr, logicalImmParams.imms);
+	m_assembler.Lsr(offsetRegister, offsetRegister, 3);
+	m_assembler.Add(src1AddrReg, src1AddrReg, static_cast<CRV64Assembler::REGISTER64>(offsetRegister));
+
+	m_assembler.Ld1_4s(dstReg, src1AddrReg);
+	
+	CommitSymbolRegisterMd(dst, dstReg);
+}
+
+CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_mdConstMatchersRVV[] =
 {
     { OP_MD_ADD_B,              MATCH_VARIABLE128,    MATCH_VARIABLE128,    MATCH_VARIABLE128,      MATCH_NIL, &CCodeGen_RV64::Emit_Md_VarVarVar<MDOP_ADDB>                  },
     { OP_MD_ADD_H,              MATCH_VARIABLE128,    MATCH_VARIABLE128,    MATCH_VARIABLE128,      MATCH_NIL, &CCodeGen_RV64::Emit_Md_VarVarVar<MDOP_ADDH>                  },
@@ -1545,4 +2127,4 @@ CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_mdConstMatchersMem[] =
     { OP_MERGETO256,            MATCH_MEMORY256,      MATCH_VARIABLE128,    MATCH_VARIABLE128,      MATCH_NIL, &CCodeGen_RV64::Emit_MergeTo256_MemVarVar                     },
 
     { OP_MOV,                   MATCH_NIL,            MATCH_NIL,            MATCH_NIL,              MATCH_NIL, nullptr                                                          },
-};*/
+};
