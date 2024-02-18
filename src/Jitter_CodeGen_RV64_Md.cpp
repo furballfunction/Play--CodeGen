@@ -777,15 +777,38 @@ void CCodeGen_RV64::Emit_Md_Expand_MemCst(const STATEMENT& statement)
 
 void CCodeGen_RV64::Emit_Md_ClampS_MemMem(const STATEMENT& statement)
 {
+    if (m_thead_extentions) {
+        auto dst = statement.dst->GetSymbol().get();
+        auto src1 = statement.src1->GetSymbol().get();
+
+        auto dstAddrReg = GetNextTempRegister64();
+        auto src1AddrReg = GetNextTempRegister64();
+        auto dstReg = GetNextTempRegisterMd();
+        auto tmpReg = GetNextTempRegister64();
+
+        LoadMemory128AddressInRegister(dstAddrReg, dst);
+        LoadMemory128AddressInRegister(src1AddrReg, src1);
+
+        auto cst1Reg = GetNextTempRegisterMd();
+        auto cst2Reg = GetNextTempRegisterMd();
+
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 8);
+        m_assembler.Ldr_Pc(cst1Reg, g_fpClampMask1, tmpReg);
+        m_assembler.Vlwv(dstReg, src1AddrReg, 0);
+        //LoadMemoryFpSingleInRegisterRVV(result2Reg, src1);
+        m_assembler.Vminvv(dstReg, dstReg, cst1Reg, 0);
+        m_assembler.Ldr_Pc(cst2Reg, g_fpClampMask2, tmpReg);
+        m_assembler.Vminuvv(dstReg, dstReg, cst2Reg, 0);
+        m_assembler.Vswv(dstReg, dstAddrReg, 0);
+        //StoreRegisterInMemoryFpSingleRVV(dst, result2Reg);
+
+        return;
+    }
+
     auto dst = statement.dst->GetSymbol().get();
     auto src1 = statement.src1->GetSymbol().get();
 
-    //auto dstAddrReg = CRV64Assembler::r0;
-    //auto src1AddrReg = CRV64Assembler::r1;
-    //auto cstAddrReg = CRV64Assembler::r2;
-    //auto dstReg = CRV64Assembler::q0;
-    //auto cst0Reg = CRV64Assembler::q1;
-    //auto cst1Reg = CRV64Assembler::q2;
     auto dstAddrReg = CRV64Assembler::x10;
     auto src1AddrReg = CRV64Assembler::x11;
     auto cst1Reg = GetNextTempRegister();
@@ -797,39 +820,6 @@ void CCodeGen_RV64::Emit_Md_ClampS_MemMem(const STATEMENT& statement)
 
     m_assembler.Li(cst1Reg, 0x7F7FFFFF);
     m_assembler.Li(cst2Reg, 0xFF7FFFFF);
-
-    //m_assembler.Adrl(cstAddrReg, g_fpClampMask1);
-    //m_assembler.Vld1_32x4(cst0Reg, cstAddrReg);
-    //m_assembler.Adrl(cstAddrReg, g_fpClampMask2);
-    //m_assembler.Vld1_32x4(cst1Reg, cstAddrReg);
-
-    //m_assembler.Vld1_32x4(dstReg, src1AddrReg);
-    //m_assembler.Vmin_I32(dstReg, dstReg, cst0Reg);
-    //m_assembler.Vmin_U32(dstReg, dstReg, cst1Reg);
-    //m_assembler.Vst1_32x4(dstReg, dstAddrReg);
-
-    //auto result2Reg = CRV64Assembler::v0;
-    auto result2Reg = GetNextTempRegisterMd();
-    auto tmp2Reg = GetNextTempRegister();
-    auto tmpAddr2Reg = GetNextTempRegister64();
-
-    auto cst1Reg2 = GetNextTempRegisterMd();
-	auto cst2Reg2 = GetNextTempRegisterMd();
-
-    if (m_thead_extentions) {
-        m_assembler.Addiw(tmp2Reg, CRV64Assembler::zero, 4);
-        m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), 8);
-        m_assembler.Ldr_Pc(cst1Reg2, g_fpClampMask1, tmpAddr2Reg);
-        m_assembler.Vlwv(result2Reg, src1AddrReg, 0);
-        //LoadMemoryFpSingleInRegisterRVV(result2Reg, src1);
-        m_assembler.Vminvv(result2Reg, result2Reg, cst1Reg2, 0);
-        m_assembler.Ldr_Pc(cst2Reg2, g_fpClampMask2, tmpAddr2Reg);
-        m_assembler.Vminuvv(result2Reg, result2Reg, cst2Reg2, 0);
-        m_assembler.Vswv(result2Reg, dstAddrReg, 0);
-        //StoreRegisterInMemoryFpSingleRVV(dst, result2Reg);
-        //m_assembler.Break();
-        return;
-    }
 
     for (int i=0; i<16; i+=4) {
         m_assembler.Lw(tmpReg, src1AddrReg, i);
