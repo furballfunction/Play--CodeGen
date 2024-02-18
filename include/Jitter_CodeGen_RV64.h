@@ -115,6 +115,8 @@ namespace Jitter
         void    LoadMemoryFpSingleInRegister(CRV64Assembler::REGISTERMD, CSymbol*);
         void    StoreRegisterInMemoryFpSingle(CSymbol*, CRV64Assembler::REGISTERMD);
 
+        void    LoadMemoryFpSingleInRegisterRVV(CRV64Assembler::REGISTERMD, CSymbol*);
+        void    StoreRegisterInMemoryFpSingleRVV(CSymbol*, CRV64Assembler::REGISTERMD);
         void    LoadMemory128InRegister(CRV64Assembler::REGISTERMD, CSymbol*);
         void    StoreRegisterInMemory128(CSymbol*, CRV64Assembler::REGISTERMD);
 
@@ -1020,7 +1022,7 @@ namespace Jitter
         void    Emit_Md_Mov_RegReg(const STATEMENT&);
         void    Emit_Md_Mov_RegMem(const STATEMENT&);
         void    Emit_Md_Mov_MemReg(const STATEMENT&);
-        //void    Emit_Md_Mov_MemMem(const STATEMENT&);
+        void    Emit_Md_Mov_MemMem_RVV(const STATEMENT&);
 
         void    Emit_Md_LoadFromRef_VarVar(const STATEMENT&);
         void    Emit_Md_LoadFromRef_VarVarAny(const STATEMENT&);

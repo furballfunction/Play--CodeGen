@@ -173,6 +173,18 @@ void CCodeGen_RV64::Emit_Fp_Clamp_MemMem(const STATEMENT& statement)
     //m_assembler.Smin_4s(resultReg, resultReg, cst1Reg);
     //m_assembler.Umin_4s(resultReg, resultReg, cst2Reg);
 
+    if (m_thead_extentions) {
+        auto result2Reg = GetNextTempRegisterMd();
+        auto tmp2Reg = GetNextTempRegister();
+        m_assembler.Addiw(tmp2Reg, CRV64Assembler::zero, 1);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp2Reg), 8);
+        LoadMemoryFpSingleInRegisterRVV(result2Reg, src1);
+        m_assembler.Vminvx(result2Reg, result2Reg, static_cast<CRV64Assembler::REGISTER64>(cst1Reg), 0);
+        m_assembler.Vminuvx(result2Reg, result2Reg, static_cast<CRV64Assembler::REGISTER64>(cst2Reg), 0);
+        StoreRegisterInMemoryFpSingleRVV(dst, result2Reg);
+        return;
+    }
+
     LoadMemoryFpSingleInRegister(resultReg, src1);
     m_assembler.Fmv_x_w(tmpReg, resultReg);
 
