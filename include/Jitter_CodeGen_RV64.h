@@ -117,6 +117,7 @@ namespace Jitter
 
         void    LoadMemoryFpSingleInRegisterRVV(CRV64Assembler::REGISTERMD, CSymbol*);
         void    StoreRegisterInMemoryFpSingleRVV(CSymbol*, CRV64Assembler::REGISTERMD);
+
         void    LoadMemory128InRegister(CRV64Assembler::REGISTERMD, CSymbol*);
         void    StoreRegisterInMemory128(CSymbol*, CRV64Assembler::REGISTERMD);
 
@@ -868,7 +869,7 @@ namespace Jitter
 
         uint32    GetSavedRegisterList(uint32);
         void      Emit_Prolog(const StatementList&, uint32);
-        void      Emit_Epilog();
+        void      Emit_Epilog(uint32);
 
         CRV64Assembler::LABEL GetLabel(uint32);
         void                     MarkLabel(const STATEMENT&);

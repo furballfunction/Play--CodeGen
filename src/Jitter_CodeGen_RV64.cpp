@@ -441,11 +441,11 @@ CCodeGen_RV64::CCodeGen_RV64()
     copyMatchers(g_fpuConstMatchers);
 
     // Only MD Mem is supported
-    //if (m_thead_extentions) {
-    //    copyMatchers(g_mdConstMatchersRVV);
-    //} else {
+    if (false && m_thead_extentions) {
+        copyMatchers(g_mdConstMatchersRVV);
+    } else {
         copyMatchers(g_mdConstMatchersMem);
-    //}
+    }
 }
 
 void CCodeGen_RV64::CheckMachine() {
@@ -549,7 +549,7 @@ void CCodeGen_RV64::GenerateCode(const StatementList& statements, unsigned int s
         }
     }
 
-    Emit_Epilog();
+    Emit_Epilog(stackSize);
     m_assembler.Ret();
 
     m_assembler.ResolveLabelReferences();
@@ -934,12 +934,30 @@ uint32 CCodeGen_RV64::GetSavedRegisterList(uint32 registerUsage)
 
 #define SIGN_EXTEND_12_INT16(v) ((v & 0xFFF) | ((v & 0x800) ? 0xF000 : 0))
 
+#define NEW_CALL 0
+
 void CCodeGen_RV64::Emit_Prolog(const StatementList& statements, uint32 stackSize)
 {
-    uint32 maxParamSpillSize = GetMaxParamSpillSize(statements);
     int stackOffset = -16;
+#if NEW_CALL
+    for(uint32 i = 0; i < 32; i++) {
+        if(m_registerSave & (1 << i)) {
+            stackOffset -= 8;
+        }
+    }
+    m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, stackOffset);
+    m_assembler.Sd(CRV64Assembler::xSP, CRV64Assembler::xRA, (-stackOffset)-8);
+    m_assembler.Sd(CRV64Assembler::xSP, CRV64Assembler::xFP, (-stackOffset)-16);
+    m_assembler.Addi(CRV64Assembler::xFP, CRV64Assembler::xSP, -stackOffset);
+#endif
+    
+    uint32 maxParamSpillSize = GetMaxParamSpillSize(statements);
+    stackOffset = -16;
+#if NEW_CALL
+#else
     m_assembler.Sd(CRV64Assembler::xSP, CRV64Assembler::xFP, -16);
     m_assembler.Sd(CRV64Assembler::xSP, CRV64Assembler::xRA, -8);
+#endif
     //m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, -16);
     //m_assembler.Sd(CRV64Assembler::xSP, CRV64Assembler::xFP, 0);
     //m_assembler.Sd(CRV64Assembler::xSP, CRV64Assembler::xRA, 8);
@@ -952,7 +970,12 @@ void CCodeGen_RV64::Emit_Prolog(const StatementList& statements, uint32 stackSiz
         {
             auto reg = static_cast<CRV64Assembler::REGISTER64>(i);
             stackOffset -= 8;
+#if NEW_CALL
             m_assembler.Sd(CRV64Assembler::xSP, reg, stackOffset);
+            //m_assembler.Sd(CRV64Assembler::xFP, reg, (-stackOffset)-24);
+#else
+            m_assembler.Sd(CRV64Assembler::xSP, reg, stackOffset);
+#endif
             //m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, -8);
             //m_assembler.Sd(CRV64Assembler::xSP, reg, 0);
             //auto reg0 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 0);
@@ -960,9 +983,14 @@ void CCodeGen_RV64::Emit_Prolog(const StatementList& statements, uint32 stackSiz
             //m_assembler.Stp_PreIdx(reg0, reg1, CRV64Assembler::xSP, -16);
         }
     }
+#if NEW_CALL
+    m_assembler.Addi(CRV64Assembler::xFP, CRV64Assembler::xSP, 0);
+#else
     m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, stackOffset);
 
-    m_assembler.Mov_Sp(CRV64Assembler::xFP, CRV64Assembler::xSP);
+    //m_assembler.Mov_Sp(CRV64Assembler::xFP, CRV64Assembler::xSP);
+    m_assembler.Addi(CRV64Assembler::xFP, CRV64Assembler::xSP, 0);
+#endif
     uint32 totalStackAlloc = stackSize + maxParamSpillSize;
     int64 signedReverseTotalStackAlloc = -static_cast<int64>(totalStackAlloc);
     int16 signedReverse12TotalStackAlloc = SIGN_EXTEND_12_INT16(signedReverseTotalStackAlloc);
@@ -976,10 +1004,24 @@ void CCodeGen_RV64::Emit_Prolog(const StatementList& statements, uint32 stackSiz
     m_assembler.Mov(g_baseRegister, CRV64Assembler::x10);
 }
 
-void CCodeGen_RV64::Emit_Epilog()
+void CCodeGen_RV64::Emit_Epilog(uint32 stackSize2)
 {
-    m_assembler.Mov_Sp(CRV64Assembler::xSP, CRV64Assembler::xFP);
-
+    int stackSize = -16;
+#if NEW_CALL
+    for(uint32 i = 0; i < 32; i++) {
+        if(m_registerSave & (1 << i)) {
+            stackSize -= 8;
+        }
+    }
+    //m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xFP, stackOffset);
+    //m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xFP, stackOffset);
+    //m_assembler.Beq(CRV64Assembler::xSP, CRV64Assembler::xFP, 4*2);
+    //m_assembler.Break();
+    m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xFP, 0);
+#else
+    //m_assembler.Mov_Sp(CRV64Assembler::xSP, CRV64Assembler::xFP);
+    m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xFP, 0);
+#endif
     int stackOffset = 0;
     //Restore saved registers
     for(int32 i = 31; i >= 0; i--)
@@ -987,7 +1029,12 @@ void CCodeGen_RV64::Emit_Epilog()
         if(m_registerSave & (1 << i))
         {
             auto reg = static_cast<CRV64Assembler::REGISTER64>(i);
+#if NEW_CALL
             m_assembler.Ld(reg, CRV64Assembler::xSP, stackOffset);
+            //m_assembler.Ld(reg, CRV64Assembler::xFP, (-stackOffset)-stackSize-24);
+#else
+            m_assembler.Ld(reg, CRV64Assembler::xSP, stackOffset);
+#endif
             stackOffset += 8;
             //m_assembler.Ld(reg, CRV64Assembler::xSP, 0);
             //m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, 8);
@@ -996,9 +1043,18 @@ void CCodeGen_RV64::Emit_Epilog()
             //m_assembler.Ldp_PostIdx(reg0, reg1, CRV64Assembler::xSP, 16);
         }
     }
+#if NEW_CALL
+    m_assembler.Ld(CRV64Assembler::xRA, CRV64Assembler::xSP, stackOffset+8);
+    m_assembler.Ld(CRV64Assembler::xFP, CRV64Assembler::xSP, stackOffset);
+    //m_assembler.Ld(CRV64Assembler::xRA, CRV64Assembler::xSP, (-stackSize)-8);
+    //m_assembler.Ld(CRV64Assembler::xFP, CRV64Assembler::xSP, (-stackSize)-16);
+    m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, stackOffset+16);
+    m_assembler.Break();
+#else
     m_assembler.Ld(CRV64Assembler::xFP, CRV64Assembler::xSP, stackOffset);
     m_assembler.Ld(CRV64Assembler::xRA, CRV64Assembler::xSP, stackOffset+8);
     m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, stackOffset+16);
+#endif
     //m_assembler.Ld(CRV64Assembler::xFP, CRV64Assembler::xSP, 0);
     //m_assembler.Ld(CRV64Assembler::xRA, CRV64Assembler::xSP, 8);
     //m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, 16);
@@ -1809,7 +1865,8 @@ void CCodeGen_RV64::Emit_ExternJmp(const STATEMENT& statement)
     assert(src1->m_type == SYM_CONSTANTPTR);
 
     m_assembler.Mov(g_paramRegisters64[0], g_baseRegister);
-    Emit_Epilog();
+    Emit_Epilog(0);
+    //m_assembler.Break();
 
     if(m_generateRelocatableCalls)
     {
@@ -1835,7 +1892,8 @@ void CCodeGen_RV64::Emit_ExternJmpDynamic(const STATEMENT& statement)
     assert(src1->m_type == SYM_CONSTANTPTR);
 
     m_assembler.Mov(g_paramRegisters64[0], g_baseRegister);
-    Emit_Epilog();
+    Emit_Epilog(0);
+    //m_assembler.Break();
     auto fctAddressReg = GetNextTempRegister64();
 
     //auto position = m_stream->GetLength();
