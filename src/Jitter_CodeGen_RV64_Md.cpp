@@ -24,6 +24,13 @@ void CCodeGen_RV64::LoadMemory128AddressInRegister(CRV64Assembler::REGISTER64 ds
 
 void CCodeGen_RV64::LoadRelative128AddressInRegister(CRV64Assembler::REGISTER64 dstReg, CSymbol* symbol, uint32 offset)
 {
+#if 1
+    assert(symbol->m_type == SYM_RELATIVE128);
+
+	uint32 totalOffset = symbol->m_valueLow + offset;
+	assert(totalOffset < 0x1000);
+	m_assembler.Addi(dstReg, g_baseRegister, totalOffset);
+#else
     assert(symbol->m_type == SYM_RELATIVE128);
 
     uint32 totalOffset = symbol->m_valueLow + offset;
@@ -39,10 +46,18 @@ void CCodeGen_RV64::LoadRelative128AddressInRegister(CRV64Assembler::REGISTER64 
         LoadConstant64InRegister(dstReg, totalOffset);
         m_assembler.Add(dstReg, g_baseRegister, dstReg);
     }
+#endif
 }
 
 void CCodeGen_RV64::LoadTemporary128AddressInRegister(CRV64Assembler::REGISTER64 dstReg, CSymbol* symbol, uint32 offset)
 {
+#if 1
+    assert(symbol->m_type == SYM_TEMPORARY128);
+
+	uint32 totalOffset = symbol->m_stackLocation + offset;
+	assert(totalOffset < 0x1000);
+	m_assembler.Addi(dstReg, CRV64Assembler::xSP, totalOffset);
+#else
     assert(symbol->m_type == SYM_TEMPORARY128);
 
     uint32 totalOffset = symbol->m_stackLocation + m_stackLevel + offset;
@@ -58,10 +73,18 @@ void CCodeGen_RV64::LoadTemporary128AddressInRegister(CRV64Assembler::REGISTER64
         LoadConstant64InRegister(dstReg, totalOffset);
         m_assembler.Add(dstReg, CRV64Assembler::xSP, dstReg);
     }
+#endif
 }
 
 void CCodeGen_RV64::LoadTemporary256ElementAddressInRegister(CRV64Assembler::REGISTER64 dstReg, CSymbol* symbol, uint32 offset)
 {
+#if 1
+    assert(symbol->m_type == SYM_TEMPORARY256);
+
+	uint32 totalOffset = symbol->m_stackLocation + offset;
+	assert(totalOffset < 0x1000);
+	m_assembler.Addi(dstReg, CRV64Assembler::xSP, totalOffset);
+#else
     assert(symbol->m_type == SYM_TEMPORARY256);
 
     uint32 totalOffset = symbol->m_stackLocation + m_stackLevel + offset;
@@ -77,6 +100,7 @@ void CCodeGen_RV64::LoadTemporary256ElementAddressInRegister(CRV64Assembler::REG
         LoadConstant64InRegister(dstReg, totalOffset);
         m_assembler.Add(dstReg, CRV64Assembler::xSP, dstReg);
     }
+#endif
 }
 
 template <typename MDOP>

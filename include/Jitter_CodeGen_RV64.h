@@ -957,7 +957,9 @@ namespace Jitter
         void    Emit_CondJmp_Ref_VarCst(const STATEMENT&);
 
         void    Cmp_GetFlag(CRV64Assembler::REGISTER32, Jitter::CONDITION);
+        bool    Cmp_GetFlag(CRV64Assembler::REGISTER32, Jitter::CONDITION, CRV64Assembler::REGISTER32 src1Reg, int16 imm);
         void    Cmp_GetFlag(CRV64Assembler::REGISTER32, Jitter::CONDITION, CRV64Assembler::REGISTER32 src1Reg, CRV64Assembler::REGISTER32 src2Reg);
+        bool    Cmp_GetFlag(CRV64Assembler::REGISTER32, Jitter::CONDITION, CRV64Assembler::REGISTER64 src1Reg, int16 imm);
         void    Cmp_GetFlag(CRV64Assembler::REGISTER32, Jitter::CONDITION, CRV64Assembler::REGISTER64 src1Reg, CRV64Assembler::REGISTER64 src2Reg);
         void    Cmp_GetFlag(CRV64Assembler::REGISTER32, Jitter::CONDITION, CRV64Assembler::REGISTERMD src1Reg, CRV64Assembler::REGISTERMD src2Reg);
         void    Emit_Cmp_VarAnyVar(const STATEMENT&);

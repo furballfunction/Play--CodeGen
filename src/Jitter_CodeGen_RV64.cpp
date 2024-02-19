@@ -2042,6 +2042,67 @@ void CCodeGen_RV64::Cmp_GetFlag(CRV64Assembler::REGISTER32 registerId, Jitter::C
 }
 
 #define SIGN_EXTEND_12_INT16(v) ((v & 0xFFF) | ((v & 0x800) ? 0xF000 : 0))
+bool CCodeGen_RV64::Cmp_GetFlag(CRV64Assembler::REGISTER32 registerId, Jitter::CONDITION condition, CRV64Assembler::REGISTER32 src1Reg, int16 imm)
+{
+    ADDSUB_IMM_PARAMS addSubImmParams;
+    switch(condition)
+    {
+    case CONDITION_EQ:
+        if (SIGN_EXTEND_12_INT16((-imm)) == (-imm)) {
+            m_assembler.Addi(static_cast<CRV64Assembler::REGISTER64>(registerId), static_cast<CRV64Assembler::REGISTER64>(src1Reg), -imm);
+            m_assembler.Sltiu(static_cast<CRV64Assembler::REGISTER64>(registerId), static_cast<CRV64Assembler::REGISTER64>(registerId), 1);
+            return true;
+        }
+        return false;
+        break;
+    case CONDITION_NE:
+        if (SIGN_EXTEND_12_INT16((-imm)) == (-imm)) {
+            m_assembler.Addi(static_cast<CRV64Assembler::REGISTER64>(registerId), static_cast<CRV64Assembler::REGISTER64>(src1Reg), -imm);
+            m_assembler.Sltu(static_cast<CRV64Assembler::REGISTER64>(registerId), CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(registerId));
+            return true;
+        }
+        return false;
+        break;
+    case CONDITION_LT:
+        if (SIGN_EXTEND_12_INT16(imm) == imm) {
+            m_assembler.Slti(static_cast<CRV64Assembler::REGISTER64>(registerId), static_cast<CRV64Assembler::REGISTER64>(src1Reg), imm);
+            return true;
+        }
+        return false;
+        break;
+    case CONDITION_LE:
+        if (SIGN_EXTEND_12_INT16((imm+1)) == (imm+1)) {
+            m_assembler.Slti(static_cast<CRV64Assembler::REGISTER64>(registerId), static_cast<CRV64Assembler::REGISTER64>(src1Reg), imm+1);
+            return true;
+        }
+        return false;
+        break;
+    case CONDITION_GT:
+        return false;
+        assert(false);
+        break;
+    case CONDITION_BL:
+        if (SIGN_EXTEND_12_INT16(imm) == imm) {
+            m_assembler.Sltiu(static_cast<CRV64Assembler::REGISTER64>(registerId), static_cast<CRV64Assembler::REGISTER64>(src1Reg), imm);
+            return true;
+        }
+        return false;
+        break;
+    case CONDITION_BE:
+        return false;
+        assert(false);
+        break;
+    case CONDITION_AB:
+        return false;
+        assert(false);
+        break;
+    default:
+        assert(false);
+        break;
+    }
+    return false;
+}
+
 void CCodeGen_RV64::Cmp_GetFlag(CRV64Assembler::REGISTER32 registerId, Jitter::CONDITION condition, CRV64Assembler::REGISTER32 src1Reg, CRV64Assembler::REGISTER32 src2Reg)
 {
     switch(condition)
@@ -2061,8 +2122,11 @@ void CCodeGen_RV64::Cmp_GetFlag(CRV64Assembler::REGISTER32 registerId, Jitter::C
         m_assembler.Slt(registerId, src1Reg, src2Reg);
         break;
     case CONDITION_LE:
+        /*m_assembler.Slt(registerId, src2Reg, src1Reg);
+        m_assembler.Sltiu(registerId, registerId, 1);*/
         m_assembler.Slt(registerId, src2Reg, src1Reg);
-        m_assembler.Sltiu(registerId, registerId, 1);
+        m_assembler.Xori(static_cast<CRV64Assembler::REGISTER64>(registerId), static_cast<CRV64Assembler::REGISTER64>(registerId), 1);
+        m_assembler.Andi(static_cast<CRV64Assembler::REGISTER64>(registerId), static_cast<CRV64Assembler::REGISTER64>(registerId), 1);
         break;
     case CONDITION_GT:
         m_assembler.Slt(registerId, src2Reg, src1Reg);
@@ -2071,8 +2135,11 @@ void CCodeGen_RV64::Cmp_GetFlag(CRV64Assembler::REGISTER32 registerId, Jitter::C
         m_assembler.Sltu(registerId, src1Reg, src2Reg);
         break;
     case CONDITION_BE:
+        /*m_assembler.Sltu(registerId, src2Reg, src1Reg);
+        m_assembler.Sltiu(registerId, registerId, 1);*/
         m_assembler.Sltu(registerId, src2Reg, src1Reg);
-        m_assembler.Sltiu(registerId, registerId, 1);
+        m_assembler.Xori(static_cast<CRV64Assembler::REGISTER64>(registerId), static_cast<CRV64Assembler::REGISTER64>(registerId), 1);
+        m_assembler.Andi(static_cast<CRV64Assembler::REGISTER64>(registerId), static_cast<CRV64Assembler::REGISTER64>(registerId), 1);
         break;
     case CONDITION_AB:
         m_assembler.Sltu(registerId, src2Reg, src1Reg);
@@ -2107,8 +2174,8 @@ void CCodeGen_RV64::Emit_Cmp_VarVarCst(const STATEMENT& statement)
     auto dstReg = PrepareSymbolRegisterDef(dst, GetNextTempRegister());
     auto src1Reg = PrepareSymbolRegisterUse(src1, GetNextTempRegister());
 
-    ADDSUB_IMM_PARAMS addSubImmParams;
-    /*if(TryGetAddSubImmParams(src2->m_valueLow, addSubImmParams))
+    /*ADDSUB_IMM_PARAMS addSubImmParams;
+    if(TryGetAddSubImmParams(src2->m_valueLow, addSubImmParams))
     {
         assert(0);
         m_assembler.Cmp(src1Reg, addSubImmParams.imm, addSubImmParams.shiftType);
@@ -2123,6 +2190,13 @@ void CCodeGen_RV64::Emit_Cmp_VarVarCst(const STATEMENT& statement)
         auto src2Reg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
         m_assembler.Cmp(src1Reg, src2Reg);
     }*/
+
+    ADDSUB_IMM_PARAMS addSubImmParams;
+    if (TryGetAddSub64ImmParams(src2->m_valueLow, addSubImmParams) && Cmp_GetFlag(dstReg, statement.jmpCondition, src1Reg, src2->m_valueLow))
+    {
+        CommitSymbolRegister(dst, dstReg);
+        return;
+    }
 
     auto src2Reg = PrepareSymbolRegisterUse(src2, GetNextTempRegister());
 
