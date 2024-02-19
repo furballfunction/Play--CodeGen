@@ -351,13 +351,36 @@ public:
     void    Vlswv(REGISTERMD vd, REGISTER64 rs1, REGISTER64 rs2, int vm);
     void    Vlwv(REGISTERMD vd, REGISTER64 rs1, int vm);
     void    Vswv(REGISTERMD vs3, REGISTER64 rs1, int vm);
+    void    Vlhv(REGISTERMD vd, REGISTER64 rs1, int vm);
+    void    Vshv(REGISTERMD vs3, REGISTER64 rs1, int vm);
+    void    Vlbv(REGISTERMD vd, REGISTER64 rs1, int vm);
+    void    Vsbv(REGISTERMD vs3, REGISTER64 rs1, int vm);
     void    Vsetvli(REGISTER64 rd, REGISTER64 rs1, int vtypei);
+    void    Vsetvli(REGISTER64 rd, REGISTER64 rs1, int vtypei, int count);
     void    Vextxv(REGISTER64 rd, REGISTERMD vs1, REGISTER64 rs1);
     void    Vmvsx(REGISTERMD vd, REGISTER64 rs1);
+    void    Vmaxvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vminvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vminvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
     void    Vminuvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vminuvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
+    void    Vaddvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vsubvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vssubuvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vssubvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vsadduvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vsaddvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vsllvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
+    void    Vsrlvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
+    void    Vsravi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
+    void    Vmseqvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vmsltvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vmulhuvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vmulvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vandvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vxorvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
+    void    Vxorvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vorvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
 
     void    Lwu(REGISTER32 rd, REGISTER64 rs1, int32 imm);
     void    Lw(REGISTER32 rd, REGISTER64 rs1, int32 imm);
@@ -420,6 +443,8 @@ public:
 
     void    Break();
 
+    void    SetTHeadExtentions(bool available) {m_thead_extentions = available;}
+
 private:
     struct LABELREF
     {
@@ -474,4 +499,6 @@ private:
     Literal128ArrayType      m_literal128Refs;
 
     Framework::CStream*    m_stream = nullptr;
+
+    bool    m_thead_extentions = false;
 };

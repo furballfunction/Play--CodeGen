@@ -446,6 +446,8 @@ CCodeGen_RV64::CCodeGen_RV64()
     //} else {
         copyMatchers(g_mdConstMatchersMem);
     //}
+
+    m_assembler.SetTHeadExtentions(m_thead_extentions);
 }
 
 void CCodeGen_RV64::CheckMachine() {
@@ -1757,7 +1759,7 @@ void CCodeGen_RV64::Emit_RetVal_Mem64(const STATEMENT& statement)
 void CCodeGen_RV64::Emit_RetVal_Reg128(const STATEMENT& statement)
 {
     auto dst = statement.dst->GetSymbol().get();
-
+#warning something missing
     /*m_assembler.Ins_1d(g_registersMd[dst->m_valueLow], 0, CRV64Assembler::x0);
     m_assembler.Ins_1d(g_registersMd[dst->m_valueLow], 1, CRV64Assembler::x1);*/
     //m_assembler.Addi(CRV64Assembler::x0, CRV64Assembler::x0, 0);
@@ -2039,6 +2041,7 @@ void CCodeGen_RV64::Cmp_GetFlag(CRV64Assembler::REGISTER32 registerId, Jitter::C
     }
 }
 
+#define SIGN_EXTEND_12_INT16(v) ((v & 0xFFF) | ((v & 0x800) ? 0xF000 : 0))
 void CCodeGen_RV64::Cmp_GetFlag(CRV64Assembler::REGISTER32 registerId, Jitter::CONDITION condition, CRV64Assembler::REGISTER32 src1Reg, CRV64Assembler::REGISTER32 src2Reg)
 {
     switch(condition)

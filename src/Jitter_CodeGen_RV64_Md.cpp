@@ -407,13 +407,23 @@ void CCodeGen_RV64::Emit_Md_Mov_MemMem(const STATEMENT& statement)
 
     auto dstAddrReg = CRV64Assembler::x10;
     auto src1AddrReg = CRV64Assembler::x11;
-    auto tmpReg = GetNextTempRegister();
 
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1);
     //m_assembler.Vld1_32x4(tmpReg, src1AddrReg);
     //m_assembler.Vst1_32x4(tmpReg, dstAddrReg);
 
+    if (m_thead_extentions) {
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 8);
+        auto valueReg = GetNextTempRegisterMd();
+        m_assembler.Vlwv(valueReg, src1AddrReg, 0);
+        m_assembler.Vswv(valueReg, dstAddrReg, 0);
+        return;
+    }
+
+    auto tmpReg = GetNextTempRegister();
     for (int i=0; i<16; i+=4) {
         m_assembler.Lw(tmpReg, src1AddrReg, i);
         m_assembler.Str(tmpReg, dstAddrReg, i);
@@ -600,6 +610,26 @@ void CCodeGen_RV64::Emit_Md_LoadFromRef_MemVarAny(const STATEMENT& statement)
 
 void CCodeGen_RV64::Emit_Md_StoreAtRef_VarMem(const STATEMENT& statement)
 {
+    if (m_thead_extentions) {
+        auto src1 = statement.src1->GetSymbol().get();
+        auto src2 = statement.src2->GetSymbol().get();
+
+        auto src1AddrReg = PrepareSymbolRegisterUseRef(src1, GetNextTempRegister64());
+        auto src2AddrReg = GetNextTempRegister64();
+
+        auto src2Reg = GetNextTempRegisterMd();
+
+        LoadMemory128AddressInRegister(src2AddrReg, src2);
+
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 8);
+        m_assembler.Vlwv(src2Reg, src2AddrReg, 0);
+        m_assembler.Vswv(src2Reg, src1AddrReg, 0);
+
+        return;
+    }
+
     auto src1 = statement.src1->GetSymbol().get();
     auto src2 = statement.src2->GetSymbol().get();
 
