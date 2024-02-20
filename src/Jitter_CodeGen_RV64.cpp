@@ -936,22 +936,71 @@ uint16 CCodeGen_RV64::GetSavedRegisterList(uint32 registerUsage)
 
 #define SIGN_EXTEND_12_INT16(v) ((v & 0xFFF) | ((v & 0x800) ? 0xF000 : 0))
 
+#define NEW_FP 1
+
+#if NEW_FP
+int getFrameSize(uint16 m_registerSave) {
+    int frameSize = 16;
+    for (uint32 i = 0; i < 16; i++) {
+        if (m_registerSave & (1 << i)) {
+            frameSize += 16;
+        }
+    }
+    return frameSize;
+}
+#endif
+
 void CCodeGen_RV64::Emit_Prolog(const StatementList& statements, uint32 stackSize)
 {
     uint32 maxParamSpillSize = GetMaxParamSpillSize(statements);
-    m_assembler.Stp_PreIdx(CRV64Assembler::xFP, CRV64Assembler::xRA, CRV64Assembler::xSP, -16);
+    //m_assembler.Stp_PreIdx(CRV64Assembler::xFP, CRV64Assembler::xRA, CRV64Assembler::xSP, -16);
+
+#if NEW_FP
+    int frameSize = getFrameSize(m_registerSave);
+#else
+    int frameSize = 16;
+#endif
+    int framePos = frameSize;
+    // sub from the stack pointer for the new stack space
+    m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, -frameSize);
+    // store the return address pointer
+    framePos -= 8;
+    m_assembler.Sd(CRV64Assembler::xSP, CRV64Assembler::xRA, framePos);
+    // store the frame pointer
+    framePos -= 8;
+    m_assembler.Sd(CRV64Assembler::xSP, CRV64Assembler::xFP, framePos);
+#if NEW_FP
+    m_assembler.Addi(CRV64Assembler::xFP, CRV64Assembler::xSP, frameSize);
+#endif
 
     //Preserve saved registers
     for(uint32 i = 0; i < 16; i++)
     {
         if(m_registerSave & (1 << i))
         {
-            auto reg0 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 0);
+#if NEW_FP
+            framePos -= 8;
             auto reg1 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 1);
-            m_assembler.Stp_PreIdx(reg0, reg1, CRV64Assembler::xSP, -16);
+            m_assembler.Sd(CRV64Assembler::xSP, reg1, framePos);
+            framePos -= 8;
+            auto reg0 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 0);
+            m_assembler.Sd(CRV64Assembler::xSP, reg0, framePos);
+#else
+            // sub from the stack pointer for the new stack space
+            m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, -16);
+            auto reg0 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 0);
+            m_assembler.Sd(CRV64Assembler::xSP, reg0, 0);
+            auto reg1 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 1);
+            m_assembler.Sd(CRV64Assembler::xSP, reg1, 8);
+            //m_assembler.Stp_PreIdx(reg0, reg1, CRV64Assembler::xSP, -16);
+#endif
         }
     }
-    m_assembler.Mov_Sp(CRV64Assembler::xFP, CRV64Assembler::xSP);
+#if NEW_FP
+#else
+    //m_assembler.Mov_Sp(CRV64Assembler::xFP, CRV64Assembler::xSP);
+    m_assembler.Addi(CRV64Assembler::xFP, CRV64Assembler::xSP, 0);
+#endif
     uint32 totalStackAlloc = stackSize + maxParamSpillSize;
     int64 signedReverseTotalStackAlloc = -static_cast<int64>(totalStackAlloc);
     int16 signedReverse12TotalStackAlloc = SIGN_EXTEND_12_INT16(signedReverseTotalStackAlloc);
@@ -967,19 +1016,50 @@ void CCodeGen_RV64::Emit_Prolog(const StatementList& statements, uint32 stackSiz
 
 void CCodeGen_RV64::Emit_Epilog()
 {
-    m_assembler.Mov_Sp(CRV64Assembler::xSP, CRV64Assembler::xFP);
+#if NEW_FP
+    int frameSize = getFrameSize(m_registerSave);
+    int framePos = 0;
+    m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xFP, -frameSize);
+#else
+    int frameSize = 16;
+    //m_assembler.Mov_Sp(CRV64Assembler::xSP, CRV64Assembler::xFP);
+    m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xFP, 0);
+#endif
 
     //Restore saved registers
     for(int32 i = 15; i >= 0; i--)
     {
         if(m_registerSave & (1 << i))
         {
+#if NEW_FP
             auto reg0 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 0);
+            m_assembler.Ld(reg0, CRV64Assembler::xSP, framePos);
+            framePos += 8;
             auto reg1 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 1);
-            m_assembler.Ldp_PostIdx(reg0, reg1, CRV64Assembler::xSP, 16);
+            m_assembler.Ld(reg1, CRV64Assembler::xSP, framePos);
+            framePos += 8;
+#else
+            auto reg0 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 0);
+            m_assembler.Ld(reg0, CRV64Assembler::xSP, 0);
+            auto reg1 = static_cast<CRV64Assembler::REGISTER64>((i * 2) + 1);
+            m_assembler.Ld(reg1, CRV64Assembler::xSP, 8);
+            //m_assembler.Ldp_PostIdx(reg0, reg1, CRV64Assembler::xSP, 16);
+            // add to the stack pointer to remove space
+            m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, 16);
+#endif
         }
     }
-    m_assembler.Ldp_PostIdx(CRV64Assembler::xFP, CRV64Assembler::xRA, CRV64Assembler::xSP, 16);
+    //m_assembler.Ldp_PostIdx(CRV64Assembler::xFP, CRV64Assembler::xRA, CRV64Assembler::xSP, 16);
+    //int frameSize = 16;
+    // load the return address pointer
+    m_assembler.Ld(CRV64Assembler::xRA, CRV64Assembler::xSP, frameSize-8);
+    // load the frame pointer
+    m_assembler.Ld(CRV64Assembler::xFP, CRV64Assembler::xSP, frameSize-16);
+    // add to the stack pointer to remove space
+    m_assembler.Addi(CRV64Assembler::xSP, CRV64Assembler::xSP, frameSize);
+#if NEW_FP
+    //m_assembler.Break();
+#endif
 }
 
 CRV64Assembler::LABEL CCodeGen_RV64::GetLabel(uint32 blockId)
