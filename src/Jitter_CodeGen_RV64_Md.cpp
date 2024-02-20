@@ -638,12 +638,14 @@ void CCodeGen_RV64::LoadRefIndexAddress(CRV64Assembler::REGISTER64 dstRegister, 
 
     refRegister = PrepareSymbolRegisterUseRef(refSymbol, refRegister);
 
-    /*if(uint8 immediate = 0, shiftAmount = 0;
-        indexSymbol->IsConstant() && TryGetAluImmediateParams(indexSymbol->m_valueLow, immediate, shiftAmount))
+    ADDSUB_IMM_PARAMS addSubImmParams;
+    if(indexSymbol->IsConstant() && TryGetAddSubImmParams(indexSymbol->m_valueLow, addSubImmParams))
+    //if(uint8 immediate = 0, shiftAmount = 0;
+    //    indexSymbol->IsConstant() && TryGetAluImmediateParams(indexSymbol->m_valueLow, immediate, shiftAmount))
     {
-        m_assembler.Add(dstRegister, refRegister, CAArch32Assembler::MakeImmediateAluOperand(immediate, shiftAmount));
+        m_assembler.Addi(dstRegister, refRegister, addSubImmParams.imm);
     }
-    else*/
+    else
     {
         //auto indexReg = PrepareSymbolRegisterUse(indexSymbol, indexRegister);
         //m_assembler.Add(dstRegister, refRegister, indexReg);
