@@ -1467,6 +1467,16 @@ void CRV64Assembler::Fadd_4s_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, 
 
 void CRV64Assembler::Fadd_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        //Addiw(tmp1Reg, CRV64Assembler::zero, 4);
+        //Vsetvli(CRV64Assembler::xZR, static_cast<REGISTER64>(tmp1Reg), 8);
+        //Vlwv(v0, src1AddrReg, 0);
+        //Vlwv(v1, src2AddrReg, 0);
+        Vfaddvv(rd, rn, rm, 0);
+        //Vswv(v0, dstAddrReg, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4E20D400;
     opcode |= (rd <<  0);
@@ -1648,6 +1658,11 @@ void CRV64Assembler::Fmul_1s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Fmul_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vfmulvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6E20DC00;
     opcode |= (rd <<  0);
@@ -1800,6 +1815,11 @@ void CRV64Assembler::Fsub_1s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Fsub_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vfsubvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4EA0D400;
     opcode |= (rd <<  0);
@@ -4574,6 +4594,35 @@ void CRV64Assembler::Vsbv(REGISTERMD vs3, REGISTER64 rs1, int vm) {
     WriteWord(opcode);
 }
 
+void CRV64Assembler::Vflwv(REGISTERMD vd, REGISTER64 rs1, int vm2) {
+    uint32 opcode = 0x00000007;
+    //vm = 0x120;
+    uint32 width = 2; // float word
+    uint32 lumop_rs2_vs2 = 0;
+    uint32 vm = 1; // unmasked
+    uint32 mop = 4; // sign-extended unit-stride
+    uint32 nf = 0;
+    //uint32 opcode = 0x12006007;
+    opcode |= (vd << 7);
+    opcode |= (width << 12);
+    opcode |= (rs1 << 15);
+    opcode |= (lumop_rs2_vs2 << 20);
+    opcode |= (vm << 25);
+    opcode |= (mop << 26);
+    opcode |= (nf << 29);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vfswv(REGISTERMD vs3, REGISTER64 rs1, int vm) {
+    uint32 opcode = 0x02000027;
+    uint32 width = 2; // float word
+    opcode |= (vs3 << 7);
+    opcode |= (width << 12);
+    opcode |= (rs1 << 15);
+    opcode |= (vm << 20);
+    WriteWord(opcode);
+}
+
 void CRV64Assembler::Vsetvli(REGISTER64 rd, REGISTER64 rs1, int vtypei, int count) {
     Addi(rs1, CRV64Assembler::xZR, 16);
     Vsetvli(CRV64Assembler::xZR, rs1, 0);
@@ -4796,6 +4845,54 @@ void CRV64Assembler::Vxorvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int v
 
 void CRV64Assembler::Vorvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
     uint32 opcode = 0x2a000057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vfaddvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x02001057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vfsubvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x0a001057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vfmulvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x92001057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vnsrlvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm) {
+    uint32 opcode = 0xb2003057;
+    opcode |= (vd << 7);
+    opcode |= ((imm & 0x1F) << 15);
+    opcode |= (vs2 << 20);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vmfltvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x6e001057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vmfeqvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x62001057;
     opcode |= (vd << 7);
     opcode |= (vs2 << 20);
     opcode |= (vs1 << 15);

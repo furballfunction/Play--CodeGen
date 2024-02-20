@@ -355,6 +355,8 @@ public:
     void    Vshv(REGISTERMD vs3, REGISTER64 rs1, int vm);
     void    Vlbv(REGISTERMD vd, REGISTER64 rs1, int vm);
     void    Vsbv(REGISTERMD vs3, REGISTER64 rs1, int vm);
+    void    Vflwv(REGISTERMD vd, REGISTER64 rs1, int vm);
+    void    Vfswv(REGISTERMD vs3, REGISTER64 rs1, int vm);
     void    Vsetvli(REGISTER64 rd, REGISTER64 rs1, int vtypei);
     void    Vsetvli(REGISTER64 rd, REGISTER64 rs1, int vtypei, int count);
     void    Vextxv(REGISTER64 rd, REGISTERMD vs1, REGISTER64 rs1);
@@ -381,6 +383,12 @@ public:
     void    Vxorvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
     void    Vxorvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vorvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vfaddvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vfsubvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vfmulvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vnsrlvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
+    void    Vmfltvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vmfeqvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
 
     void    Lwu(REGISTER32 rd, REGISTER64 rs1, int32 imm);
     void    Lw(REGISTER32 rd, REGISTER64 rs1, int32 imm);

@@ -214,6 +214,45 @@ void CCodeGen_RV64::Emit_Md_MemMemSR1I(const STATEMENT& statement)
 }
 
 template <typename MDOP>
+void CCodeGen_RV64::Emit_Md_MemMemMemRVV(const STATEMENT& statement)
+{
+    assert(m_thead_extentions);
+    //assert(0);
+    auto dst = statement.dst->GetSymbol().get();
+    auto src1 = statement.src1->GetSymbol().get();
+    auto src2 = statement.src2->GetSymbol().get();
+
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto src2AddrReg = CRV64Assembler::x12;
+    //auto dstReg = CRV64Assembler::q0;
+    //auto src1Reg = CRV64Assembler::q1;
+    //auto src2Reg = CRV64Assembler::q2;
+    auto dstReg = CRV64Assembler::v0;
+    auto src1Reg = CRV64Assembler::v1;
+    auto src2Reg = CRV64Assembler::v2;
+
+    LoadMemory128AddressInRegister(dstAddrReg, dst);
+    LoadMemory128AddressInRegister(src1AddrReg, src1);
+    LoadMemory128AddressInRegister(src2AddrReg, src2);
+
+    //m_assembler.Vld1_32x4(src1Reg, src1AddrReg);
+    //m_assembler.Vld1_32x4(src2Reg, src2AddrReg);
+    //((m_assembler).*(MDOP::OpReg()))(dstReg, src1Reg, src2Reg);
+    //m_assembler.Vst1_32x4(dstReg, dstAddrReg);
+
+    auto tmp1Reg = GetNextTempRegister();
+    auto tmp2Reg = GetNextTempRegister();
+
+    m_assembler.Addiw(tmp1Reg, CRV64Assembler::zero, 4);
+    m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp1Reg), 8);
+    m_assembler.Vlwv(src1Reg, src1AddrReg, 0);
+    m_assembler.Vlwv(src2Reg, src2AddrReg, 0);
+    ((m_assembler).*(MDOP::OpReg()))(dstReg, src1Reg, src2Reg);
+    m_assembler.Vswv(dstReg, dstAddrReg, 0);
+}
+
+template <typename MDOP>
 void CCodeGen_RV64::Emit_Md_MemMemMem(const STATEMENT& statement)
 {
     //assert(0);
@@ -575,6 +614,16 @@ void CCodeGen_RV64::Emit_Md_LoadFromRef_MemVar(const STATEMENT& statement)
     //m_assembler.Vld1_32x4(dstReg, src1AddrReg);
     //m_assembler.Vst1_32x4(dstReg, dstAddrReg);
 
+    if (m_thead_extentions) {
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 8);
+        auto valueReg = GetNextTempRegisterMd();
+        m_assembler.Vlwv(valueReg, src1AddrReg, 0);
+        m_assembler.Vswv(valueReg, dstAddrReg, 0);
+        return;
+    }
+
     auto tmpReg = GetNextTempRegister();
     for (int i=0; i<16; i+=4) {
         m_assembler.Lw(tmpReg, src1AddrReg, i);
@@ -625,6 +674,16 @@ void CCodeGen_RV64::Emit_Md_LoadFromRef_MemVarAny(const STATEMENT& statement)
     //m_assembler.Vld1_32x4(dstReg, src1AddrIdxReg);
     //m_assembler.Vst1_32x4(dstReg, dstAddrReg);
 
+    if (m_thead_extentions) {
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 8);
+        auto valueReg = GetNextTempRegisterMd();
+        m_assembler.Vlwv(valueReg, src1AddrIdxReg, 0);
+        m_assembler.Vswv(valueReg, dstAddrReg, 0);
+        return;
+    }
+
     auto tmpReg = GetNextTempRegister();
     for (int i=0; i<16; i+=4) {
         m_assembler.Lw(tmpReg, src1AddrIdxReg, i);
@@ -669,6 +728,16 @@ void CCodeGen_RV64::Emit_Md_StoreAtRef_VarMem(const STATEMENT& statement)
     //m_assembler.Vld1_32x4(src2Reg, src2AddrReg);
     //m_assembler.Vst1_32x4(src2Reg, src1AddrReg);
 
+    if (m_thead_extentions) {
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 8);
+        auto valueReg = GetNextTempRegisterMd();
+        m_assembler.Vlwv(valueReg, src2AddrReg, 0);
+        m_assembler.Vswv(valueReg, src1AddrReg, 0);
+        return;
+    }
+
     auto tmpReg = GetNextTempRegister();
     for (int i=0; i<16; i+=4) {
         m_assembler.Lw(tmpReg, src2AddrReg, i);
@@ -697,6 +766,16 @@ void CCodeGen_RV64::Emit_Md_StoreAtRef_VarAnyMem(const STATEMENT& statement)
 
     //m_assembler.Vld1_32x4(valueReg, valueAddrReg);
     //m_assembler.Vst1_32x4(valueReg, src1AddrIdxReg);
+
+    if (m_thead_extentions) {
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 8);
+        auto valueReg = GetNextTempRegisterMd();
+        m_assembler.Vlwv(valueReg, valueAddrReg, 0);
+        m_assembler.Vswv(valueReg, src1AddrIdxReg, 0);
+        return;
+    }
 
     auto tmpReg = GetNextTempRegister();
     for (int i=0; i<16; i+=4) {
@@ -885,6 +964,76 @@ void CCodeGen_RV64::Emit_Md_ClampS_MemMem(const STATEMENT& statement)
 
 void CCodeGen_RV64::Emit_Md_MakeSz_VarMem(const STATEMENT& statement)
 {
+    // pack is negative signed and is zero into 8 bits SSSSZZZZ
+    if (m_thead_extentions) {
+        auto dst = statement.dst->GetSymbol().get();
+        auto src1 = statement.src1->GetSymbol().get();
+
+        //m_nextTempRegisterMd = 0;
+
+        auto src1AddrReg = GetNextTempRegister64();
+        auto tmpReg = GetNextTempRegister64();
+        auto tmp2Reg = GetNextTempRegister64();
+        auto tmpSignReg = GetNextTempRegister64();
+        auto tmpZeroReg = GetNextTempRegister64();
+
+        LoadMemory128AddressInRegister(src1AddrReg, src1);
+
+        auto dstReg = PrepareSymbolRegisterDef(dst, CRV64Assembler::a0);
+
+        auto cstReg = CRV64Assembler::v8;
+        auto signReg = CRV64Assembler::v6;
+        auto zeroReg = CRV64Assembler::v7;
+        auto src1Reg = CRV64Assembler::v9;
+
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 8);
+
+        // vlw.v v9, (a1)
+        m_assembler.Vlwv(src1Reg, src1AddrReg, 0);
+
+        // vlw.v v8, (a3)
+        LITERAL128 litZero(0x0000000000000000UL, 0x0000000000000000UL);
+        m_assembler.Ldr_Pc(cstReg, litZero, tmpReg);
+
+        // vmflt.vv v6, v9, v8
+        m_assembler.Vmfltvv(signReg, src1Reg, cstReg, 0);
+        // vmfeq.vv v7, v9, v8
+        m_assembler.Vmfeqvv(zeroReg, src1Reg, cstReg, 0);
+
+        //vsw.v v6, (a1)
+        //vsw.v v7, (a2)
+        //vsw.v v0, (a3)
+
+        // addi a4, zero, 0
+        m_assembler.Addi(tmpSignReg, CRV64Assembler::xZR, 0);
+        // addi a5, zero, 0
+        m_assembler.Addi(tmpZeroReg, CRV64Assembler::xZR, 0);
+
+        for (int i=0; i<4; i++) {
+            // addi a6, zero, 0
+            m_assembler.Addi(tmp2Reg, CRV64Assembler::xZR, i);
+            // vext.x.v a0, v6, a6
+            m_assembler.Vextxv(tmpReg, signReg, tmp2Reg);
+            // vext.x.v a1, v7, a6
+            m_assembler.Vextxv(tmp2Reg, zeroReg, tmp2Reg);
+
+            if (i>0) {
+                // slli a0, a0, 1
+                m_assembler.Slli(tmpReg, tmpReg, i);
+                // slli a1, a1, 1
+                m_assembler.Slli(tmp2Reg, tmp2Reg, i);
+            }
+
+            // or a4, a4, a0
+            m_assembler.Or(tmpSignReg, tmpSignReg, tmpReg);
+            // or a5, a5, a1
+            m_assembler.Or(tmpZeroReg, tmpZeroReg, tmp2Reg);
+        }
+
+        CommitSymbolRegister(dst, dstReg);
+    }
+
     auto dst = statement.dst->GetSymbol().get();
     auto src1 = statement.src1->GetSymbol().get();
 
@@ -1051,6 +1200,20 @@ void CCodeGen_RV64::Emit_Md_PackHB_MemMemMem(const STATEMENT& statement)
     LoadMemory128AddressInRegister(src1AddrReg, src1);
     LoadMemory128AddressInRegister(src2AddrReg, src2);
 
+    if (m_thead_extentions) {
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 8);
+        m_assembler.Vlwv(CRV64Assembler::v8, src2AddrReg, 0);
+        m_assembler.Vlwv(CRV64Assembler::v9, src1AddrReg, 0);
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 16);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 0);
+        //m_assembler.Vnsrlvi(CRV64Assembler::v2, CRV64Assembler::v8, 16, 0);
+        m_assembler.Vnsrlvi(CRV64Assembler::v2, CRV64Assembler::v8, 0, 0);
+        m_assembler.Vsbv(CRV64Assembler::v2, dstAddrReg, 0);
+        return;
+    }
+
     //m_assembler.Vld1_32x4(src1Reg, src1AddrReg);
     //m_assembler.Vld1_32x4(src2Reg, src2AddrReg);
     //m_assembler.Vmovn_I16(static_cast<CRV64Assembler::DOUBLE_REGISTER>(dstReg + 1), src1Reg);
@@ -1116,6 +1279,20 @@ void CCodeGen_RV64::Emit_Md_PackWH_MemMemMem(const STATEMENT& statement)
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1);
     LoadMemory128AddressInRegister(src2AddrReg, src2);
+
+    if (m_thead_extentions) {
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 8);
+        m_assembler.Vlwv(CRV64Assembler::v8, src2AddrReg, 0);
+        m_assembler.Vlwv(CRV64Assembler::v9, src1AddrReg, 0);
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 8);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 4);
+        //m_assembler.Vnsrlvi(CRV64Assembler::v2, CRV64Assembler::v8, 16, 0);
+        m_assembler.Vnsrlvi(CRV64Assembler::v2, CRV64Assembler::v8, 0, 0);
+        m_assembler.Vshv(CRV64Assembler::v2, dstAddrReg, 0);
+        return;
+    }
 
     //m_assembler.Vld1_32x4(src1Reg, src1AddrReg);
     //m_assembler.Vld1_32x4(src2Reg, src2AddrReg);
