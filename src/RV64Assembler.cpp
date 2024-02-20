@@ -2318,6 +2318,9 @@ void CRV64Assembler::Li(CRV64Assembler::REGISTER64 registerId, uint64 constant)
         Addi(registerId, xZR, constant);
     } else if (((int32)constant)>=-2048 && ((int32)constant)<=-1) {
         Addi(registerId, xZR, constant);
+    } else if (((constant & 0xFFFFFFFF00000000) == 0xFFFFFFFF00000000) && (constant & 0x80000000) && ((constant & 0xFFFFF000) == (constant & 0xFFFFFFFF))) {
+        // 32nd bit set and upper 32 bits are set
+        Lui(static_cast<CRV64Assembler::REGISTER64>(registerId), constant);
     } else if ((constant & 0xFFFFF000) == constant) {
         Lui(static_cast<CRV64Assembler::REGISTER64>(registerId), constant);
     } else if (((constant & 0xFFFFFFFF) == constant) && (constant & 0x800)) {
@@ -2337,6 +2340,14 @@ void CRV64Assembler::Li(CRV64Assembler::REGISTER64 registerId, uint64 constant)
         Addi(registerId, registerId, signedLower12);
         Slli(registerId, registerId, 31);
         Slli(registerId, registerId, 1);
+    } else if ((constant & 0xFFFFFFFFFF) == constant) {
+        uint32 constantUpper32 = constant >> 8;
+        int32 signedLower12 = SIGN_EXTEND_12(constantUpper32);
+        int32 signedUpper20 = (constantUpper32 - signedLower12) & 0xFFFFF000;
+        Lui(registerId, signedUpper20);
+        Addi(registerId, registerId, signedLower12);
+        Slli(registerId, registerId, 8);
+        Addi(registerId, registerId, (constant & 0xff));
     } else {
         // Upper 32 bits
         uint32 constantUpper32 = constant >> 32;
