@@ -2011,6 +2011,7 @@ void CRV64Assembler::Ldrb(REGISTER32 rt, REGISTER64 rn, uint32 offset)
     WriteLoadStoreOpImm(0x00004003, scaledOffset, rn, rt);
 }
 
+#if 0
 void CRV64Assembler::Ldrb(REGISTER32 rt, REGISTER64 rn, REGISTER64 rm, bool scaled)
 {
     /*uint32 opcode = 0x38606800;
@@ -2031,6 +2032,7 @@ void CRV64Assembler::Ldrb(REGISTER32 rt, REGISTER64 rn, REGISTER64 rm, bool scal
         Lsr(rm, rm, 2);
     }*/
 }
+#endif
 
 void CRV64Assembler::Ldrh(REGISTER32 rt, REGISTER64 rn, uint32 offset)
 {
@@ -2048,6 +2050,7 @@ void CRV64Assembler::Ldrh(REGISTER32 rt, REGISTER64 rn, uint32 offset)
     WriteLoadStoreOpImm(0x00005003, scaledOffset, rn, rt);
 }
 
+#if 0
 void CRV64Assembler::Ldrh(REGISTER32 rt, REGISTER64 rn, REGISTER64 rm, bool scaled)
 {
     /*uint32 opcode = 0x78606800;
@@ -2068,6 +2071,7 @@ void CRV64Assembler::Ldrh(REGISTER32 rt, REGISTER64 rn, REGISTER64 rm, bool scal
         Lsr(rm, rm, 1);
     }
 }
+#endif
 
 void CRV64Assembler::Ldrhs(REGISTER32 rt, REGISTER64 rn, uint32 offset)
 {
@@ -3119,6 +3123,7 @@ void CRV64Assembler::Str(REGISTER32 rt, REGISTER64 rn, uint32 offset)
     WriteLoadStoreOpImm(0x00002023, scaledOffset, rn, rt);
 }
 
+#if 0
 void CRV64Assembler::Str(REGISTER32 rt, REGISTER64 rn, REGISTER64 rm, bool scaled)
 {
     /*uint32 opcode = 0xB8206800;
@@ -3146,6 +3151,7 @@ void CRV64Assembler::Str(REGISTER32 rt, REGISTER64 rn, REGISTER64 rm, bool scale
     opcode |= (rm << 20);
     WriteWord(opcode);*/
 }
+#endif
 
 void CRV64Assembler::Str(REGISTER64 rt, REGISTER64 rn, uint32 offset)
 {
@@ -3161,6 +3167,7 @@ void CRV64Assembler::Str(REGISTER64 rt, REGISTER64 rn, uint32 offset)
     WriteLoadStoreOpImm(0x00003023, scaledOffset, rn, rt);
 }
 
+#if 0
 void CRV64Assembler::Str(REGISTER64 rt, REGISTER64 rn, REGISTER64 rm, bool scaled)
 {
     /*uint32 opcode = 0xF8206800;
@@ -3181,6 +3188,7 @@ void CRV64Assembler::Str(REGISTER64 rt, REGISTER64 rn, REGISTER64 rm, bool scale
         Lsr(rm, rm, 3);
     }
 }
+#endif
 
 void CRV64Assembler::Strb(REGISTER32 rt, REGISTER64 rn, uint32 offset)
 {
@@ -3197,6 +3205,7 @@ void CRV64Assembler::Strb(REGISTER32 rt, REGISTER64 rn, uint32 offset)
     WriteLoadStoreOpImm(0x00000023, scaledOffset, rn, rt);
 }
 
+#if 0
 void CRV64Assembler::Strb(REGISTER32 rt, REGISTER64 rn, REGISTER64 rm, bool scaled)
 {
     /*uint32 opcode = 0x38206800;
@@ -3217,6 +3226,7 @@ void CRV64Assembler::Strb(REGISTER32 rt, REGISTER64 rn, REGISTER64 rm, bool scal
         //Lsr(rm, rm, 2);
     }*/
 }
+#endif
 
 void CRV64Assembler::Strh(REGISTER32 rt, REGISTER64 rn, uint32 offset)
 {
@@ -3236,6 +3246,7 @@ void CRV64Assembler::Strh(REGISTER32 rt, REGISTER64 rn, uint32 offset)
     WriteLoadStoreOpImm(0x00001023, scaledOffset, rn, rt);
 }
 
+#if 0
 void CRV64Assembler::Strh(REGISTER32 rt, REGISTER64 rn, REGISTER64 rm, bool scaled)
 {
     /*uint32 opcode = 0x78206800;
@@ -3256,6 +3267,7 @@ void CRV64Assembler::Strh(REGISTER32 rt, REGISTER64 rn, REGISTER64 rm, bool scal
         Lsr(rm, rm, 1);
     }
 }
+#endif
 
 void CRV64Assembler::Str_1s(REGISTERMD rt, REGISTER64 rn, uint32 offset)
 {
