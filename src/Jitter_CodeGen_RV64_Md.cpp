@@ -999,7 +999,11 @@ void CCodeGen_RV64::Emit_Md_MakeSz_VarMem(const STATEMENT& statement)
         m_assembler.Ldr_Pc(cstReg, litZero, tmpReg);
 
         // vmflt.vv v6, v9, v8
+#if 1
+        m_assembler.Vsrlvi(signReg, src1Reg, 31, 0);
+#else
         m_assembler.Vmfltvv(signReg, src1Reg, cstReg, 0);
+#endif
         // vmfeq.vv v7, v9, v8
         m_assembler.Vmfeqvv(zeroReg, src1Reg, cstReg, 0);
 
@@ -1008,32 +1012,79 @@ void CCodeGen_RV64::Emit_Md_MakeSz_VarMem(const STATEMENT& statement)
         //vsw.v v0, (a3)
 
         // addi a4, zero, 0
-        m_assembler.Addi(tmpSignReg, CRV64Assembler::xZR, 0);
+        //m_assembler.Addi(tmpSignReg, CRV64Assembler::xZR, 0);
         // addi a5, zero, 0
-        m_assembler.Addi(tmpZeroReg, CRV64Assembler::xZR, 0);
+        //m_assembler.Addi(tmpZeroReg, CRV64Assembler::xZR, 0);
+        m_assembler.Addi(static_cast<CRV64Assembler::REGISTER64>(dstReg), CRV64Assembler::xZR, 0);
 
+#if 0
+        //vmfeq.vv v1, v1, v3
+        //vsll.vv v0, v1, v9
+
+        // vext.x.v a4, v0, zero
+        m_assembler.Vextxv(tmpReg, zeroReg, CRV64Assembler::xZR);
+        // addi a0, zero, 1
+        m_assembler.Addi(tmp2Reg, CRV64Assembler::xZR, 1);
+        // vext.x.v a5, v0, a0
+        m_assembler.Vextxv(tmp2Reg, zeroReg, tmp2Reg);
+        // or a4, a4, a5
+        m_assembler.Or(tmp2Reg, CRV64Assembler::xZR, 1);
+        // addi a0, zero, 2
+        m_assembler.Addi(tmp2Reg, CRV64Assembler::xZR, 1);
+        // vext.x.v a5, v0, a0
+        m_assembler.Vextxv(tmpReg, zeroReg, CRV64Assembler::xZR);
+        // or a4, a4, a5
+        m_assembler.Or(tmp2Reg, CRV64Assembler::xZR, 1);
+        // addi a0, zero, 3
+        m_assembler.Addi(tmp2Reg, CRV64Assembler::xZR, 1);
+        // vext.x.v a5, v0, a0
+        m_assembler.Vextxv(tmpReg, zeroReg, CRV64Assembler::xZR);
+        // or a4, a4, a5
+        m_assembler.Or(tmp2Reg, CRV64Assembler::xZR, 1);
+#else
+#define VECTORSHIFT 1
+#if VECTORSHIFT
+        LITERAL128 litSll(3, 2, 1, 0);
+        m_assembler.Ldr_Pc(cstReg, litSll, tmpReg);
+        // vsll.vv v0, v1, v9
+        m_assembler.Vsllvv(zeroReg, zeroReg, cstReg, 0);
+        m_assembler.Vaddvi(cstReg, cstReg, 4, 0);
+        m_assembler.Vsllvv(signReg, signReg, cstReg, 0);
+        //m_assembler.Vsllvi(signReg, signReg, 4, 0);
+#endif
         for (int i=0; i<4; i++) {
             // addi a6, zero, 0
-            m_assembler.Addi(tmp2Reg, CRV64Assembler::xZR, i);
+            m_assembler.Addi(tmp2Reg, CRV64Assembler::xZR, 3-i);
             // vext.x.v a0, v6, a6
             m_assembler.Vextxv(tmpReg, signReg, tmp2Reg);
             // vext.x.v a1, v7, a6
             m_assembler.Vextxv(tmp2Reg, zeroReg, tmp2Reg);
 
+#if VECTORSHIFT
+#else
             if (i>0) {
                 // slli a0, a0, 1
                 m_assembler.Slli(tmpReg, tmpReg, i);
                 // slli a1, a1, 1
                 m_assembler.Slli(tmp2Reg, tmp2Reg, i);
             }
+#endif
 
             // or a4, a4, a0
-            m_assembler.Or(tmpSignReg, tmpSignReg, tmpReg);
+            //m_assembler.Or(tmpSignReg, tmpSignReg, tmpReg);
             // or a5, a5, a1
-            m_assembler.Or(tmpZeroReg, tmpZeroReg, tmp2Reg);
-        }
+            //m_assembler.Or(tmpZeroReg, tmpZeroReg, tmp2Reg);
 
+            m_assembler.Or(static_cast<CRV64Assembler::REGISTER64>(dstReg), static_cast<CRV64Assembler::REGISTER64>(dstReg), tmpReg);
+            m_assembler.Or(static_cast<CRV64Assembler::REGISTER64>(dstReg), static_cast<CRV64Assembler::REGISTER64>(dstReg), tmp2Reg);
+        }
+#endif
+        //m_assembler.Addi(static_cast<CRV64Assembler::REGISTER64>(dstReg), tmpSignReg, 0);
+        //m_assembler.Addi(static_cast<CRV64Assembler::REGISTER64>(dstReg), tmpZeroReg, 0);
+        //m_assembler.Slli(dstReg, dstReg, 4);
+        //m_assembler.Or(static_cast<CRV64Assembler::REGISTER64>(dstReg), static_cast<CRV64Assembler::REGISTER64>(dstReg), tmpZeroReg);
         CommitSymbolRegister(dst, dstReg);
+        return;
     }
 
     auto dst = statement.dst->GetSymbol().get();

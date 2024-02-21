@@ -4921,3 +4921,19 @@ void CRV64Assembler::Vmfeqvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int 
     opcode |= (vs1 << 15);
     WriteWord(opcode);
 }
+
+void CRV64Assembler::Vsllvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x96000057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vaddvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm) {
+    uint32 opcode = 0x02003057;
+    opcode |= (vd << 7);
+    opcode |= ((imm & 0x1F) << 15);
+    opcode |= (vs2 << 20);
+    WriteWord(opcode);
+}

@@ -389,6 +389,8 @@ public:
     void    Vnsrlvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
     void    Vmfltvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vmfeqvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vsllvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vaddvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
 
     void    Lwu(REGISTER32 rd, REGISTER64 rs1, int32 imm);
     void    Lw(REGISTER32 rd, REGISTER64 rs1, int32 imm);
