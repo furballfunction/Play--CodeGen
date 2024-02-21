@@ -441,11 +441,12 @@ CCodeGen_RV64::CCodeGen_RV64()
     copyMatchers(g_fpuConstMatchers);
 
     // Only MD Mem is supported
-    //if (m_thead_extentions) {
-    //    copyMatchers(g_mdConstMatchersRVV);
-    //} else {
+    if (m_thead_extentions) {
+        //copyMatchers(g_mdConstMatchersRVV);
+        copyMatchers(g_mdConstMatchersMemRVV);
+    } else {
         copyMatchers(g_mdConstMatchersMem);
-    //}
+    }
 
     m_assembler.SetTHeadExtentions(m_thead_extentions);
 }

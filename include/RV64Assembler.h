@@ -65,6 +65,35 @@ public:
         CONDITION_NV
     };
 
+    enum VSEW {
+        e8,
+        e16,
+        e32,
+        e64,
+        e128
+    };
+
+    enum VWidth {
+        VectorByte,
+        FloatHalf,
+        FloatWord,
+        FloatDouble,
+        FloatQuad,
+        VectorHalf,
+        VectorWord,
+        VectorElement
+    };
+
+    struct VConfig {
+        VSEW m_sew;
+        int m_vl;
+        VWidth m_width;
+    };
+    static constexpr VConfig VConfig_e8_16_Vector{e8, 16, VectorByte};
+    static constexpr VConfig VConfig_e16_8_Vector{e16, 8, VectorHalf};
+    static constexpr VConfig VConfig_e32_4_Vector{e32, 4, VectorWord};
+    static constexpr VConfig VConfig_e32_4_Float{e32, 4, FloatWord};
+
     typedef unsigned int LABEL;
 
     virtual    ~CRV64Assembler() = default;
@@ -391,6 +420,8 @@ public:
     void    Vmfeqvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vsllvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vaddvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
+    void    Vloadv(REGISTERMD vd, REGISTER64 rs1, uint16 width, uint16 lumop_rs2_vs2, uint16 vm, uint16 mop, uint16 nf);
+    void    Vstorev(REGISTERMD vs3, REGISTER64 rs1, uint16 width, uint16 sumop_rs2_vs2, uint16 vm, uint16 mop, uint16 nf);
 
     void    Lwu(REGISTER32 rd, REGISTER64 rs1, int32 imm);
     void    Lw(REGISTER32 rd, REGISTER64 rs1, int32 imm);

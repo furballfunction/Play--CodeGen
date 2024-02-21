@@ -826,6 +826,11 @@ void CRV64Assembler::Add_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Add_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vaddvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4E208400;
     opcode |= (rd <<  0);
@@ -4643,6 +4648,30 @@ void CRV64Assembler::Vfswv(REGISTERMD vs3, REGISTER64 rs1, int vm) {
     opcode |= (width << 12);
     opcode |= (rs1 << 15);
     opcode |= (vm << 20);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vloadv(REGISTERMD vd, REGISTER64 rs1, uint16 width, uint16 lumop_rs2_vs2, uint16 vm, uint16 mop, uint16 nf) {
+    uint32 opcode = 0x00000007;
+    opcode |= (vd << 7);
+    opcode |= (width << 12);
+    opcode |= (rs1 << 15);
+    opcode |= (lumop_rs2_vs2 << 20);
+    opcode |= (vm << 25);
+    opcode |= (mop << 26);
+    opcode |= (nf << 29);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vstorev(REGISTERMD vs3, REGISTER64 rs1, uint16 width, uint16 sumop_rs2_vs2, uint16 vm, uint16 mop, uint16 nf) {
+    uint32 opcode = 0x00000027;
+    opcode |= (vs3 << 7);
+    opcode |= (width << 12);
+    opcode |= (rs1 << 15);
+    opcode |= (sumop_rs2_vs2 << 20);
+    opcode |= (vm << 25);
+    opcode |= (mop << 26);
+    opcode |= (nf << 29);
     WriteWord(opcode);
 }
 

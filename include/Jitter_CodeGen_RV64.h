@@ -325,6 +325,12 @@ namespace Jitter
             typedef void (CRV64Assembler::*OpRegType)(CRV64Assembler::REGISTERMD, CRV64Assembler::REGISTER32);
         };
 
+        struct MDOP_BASE3_MEMRVV
+        {
+            CRV64Assembler::VConfig Config;
+            typedef void (CRV64Assembler::*OpRegType)(CRV64Assembler::REGISTERMD, CRV64Assembler::REGISTERMD, CRV64Assembler::REGISTERMD);
+        };
+
         struct MDOP_BASE3
         {
             typedef void (CRV64Assembler::*OpRegType)(CRV64Assembler::REGISTERMD, CRV64Assembler::REGISTERMD, CRV64Assembler::REGISTERMD);
@@ -353,6 +359,12 @@ namespace Jitter
         struct MDOP_SHIFT_MEM
         {
             typedef void (CRV64Assembler::*OpRegType)(CRV64Assembler::REGISTER64, CRV64Assembler::REGISTER64, uint8, CRV64Assembler::REGISTER32);
+        };
+
+        struct MDOP_ADDB_MEMRVV : public MDOP_BASE3_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Add_16b; }
         };
 
         struct MDOP_ADDB : public MDOP_BASE3
@@ -646,18 +658,21 @@ namespace Jitter
             static OpRegType OpReg() { return &CRV64Assembler::Fdiv_1s; }
         };
 
-        struct MDOP_ADDS : public MDOP_BASE3
+        struct MDOP_ADDS_MEMRVV : public MDOP_BASE3_MEMRVV
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Fadd_4s; }
         };
 
-        struct MDOP_SUBS : public MDOP_BASE3
+        struct MDOP_SUBS_MEMRVV : public MDOP_BASE3_MEMRVV
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Fsub_4s; }
         };
 
-        struct MDOP_MULS : public MDOP_BASE3
+        struct MDOP_MULS_MEMRVV : public MDOP_BASE3_MEMRVV
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Fmul_4s; }
         };
 
@@ -1091,6 +1106,7 @@ namespace Jitter
         static CONSTMATCHER    g_64ConstMatchers[];
         static CONSTMATCHER    g_fpuConstMatchers[];
         static CONSTMATCHER    g_mdConstMatchersMem[];
+        static CONSTMATCHER    g_mdConstMatchersMemRVV[];
         static CONSTMATCHER    g_mdConstMatchersRVV[];
 
         static CRV64Assembler::REGISTER32    g_registers[MAX_REGISTERS];
