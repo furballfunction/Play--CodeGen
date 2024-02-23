@@ -422,6 +422,11 @@ public:
     void    Vaddvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
     void    Vloadv(REGISTERMD vd, REGISTER64 rs1, uint16 width, uint16 lumop_rs2_vs2, uint16 vm, uint16 mop, uint16 nf);
     void    Vstorev(REGISTERMD vs3, REGISTER64 rs1, uint16 width, uint16 sumop_rs2_vs2, uint16 vm, uint16 mop, uint16 nf);
+    void    Vfsgnjxvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vdivvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vfdivvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vfminvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vfmaxvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
 
     void    Lwu(REGISTER32 rd, REGISTER64 rs1, int32 imm);
     void    Lw(REGISTER32 rd, REGISTER64 rs1, int32 imm);

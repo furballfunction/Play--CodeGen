@@ -126,6 +126,44 @@ void CCodeGen_RV64::Emit_Md_MemMem(const STATEMENT& statement)
 }
 
 template <typename MDOP>
+void CCodeGen_RV64::Emit_Md_MemMemRVV(const STATEMENT& statement)
+{
+    auto dst = statement.dst->GetSymbol().get();
+    auto src1 = statement.src1->GetSymbol().get();
+
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    //auto dstReg = CRV64Assembler::q0;
+    //auto src1Reg = CRV64Assembler::q1;
+
+    LoadMemory128AddressInRegister(dstAddrReg, dst);
+    LoadMemory128AddressInRegister(src1AddrReg, src1);
+
+    //m_assembler.Vld1_32x4(src1Reg, src1AddrReg);
+    //((m_assembler).*(MDOP::OpReg()))(dstReg, src1Reg);
+    //m_assembler.Vst1_32x4(dstReg, dstAddrReg);
+
+    auto tmpReg = GetNextTempRegister();
+    auto dstReg = GetNextTempRegisterMd();
+    auto src1Reg = GetNextTempRegisterMd();
+
+    uint32 width = MDOP::Config.m_width;
+    uint32 lumop_rs2_vs2 = 0;
+    uint32 sumop_rs2_vs2 = 0;
+    uint32 vm = 1; // unmasked
+    uint32 lmop = 4; // sign-extended unit-stride
+    uint32 smop = 0; // unit-stride
+    uint32 nf = 0;
+
+    m_assembler.Addiw(tmpReg, CRV64Assembler::zero, MDOP::Config.m_vl);
+    m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmpReg), (MDOP::Config.m_sew<<2));
+    m_assembler.Vloadv(src1Reg, src1AddrReg, width, lumop_rs2_vs2, vm, lmop, nf);
+    ((m_assembler).*(MDOP::OpReg()))(dstReg, src1Reg);
+    m_assembler.Vstorev(dstReg, dstAddrReg, width, sumop_rs2_vs2, vm, smop, nf);
+    //m_assembler.Break();
+}
+
+template <typename MDOP>
 void CCodeGen_RV64::Emit_Md_MemMem1S(const STATEMENT& statement)
 {
     auto dst = statement.dst->GetSymbol().get();
@@ -515,6 +553,21 @@ void CCodeGen_RV64::Emit_Md_DivS_MemMemMem(const STATEMENT& statement)
     LoadMemory128AddressInRegister(dstAddrReg, dst);
     LoadMemory128AddressInRegister(src1AddrReg, src1);
     LoadMemory128AddressInRegister(src2AddrReg, src2);
+
+    if (m_thead_extentions) {
+        auto tmpReg = GetNextTempRegister64();
+        m_assembler.Addi(tmpReg, CRV64Assembler::xZR, 4);
+        m_assembler.Vsetvli(CRV64Assembler::xZR, tmpReg, 8);
+        auto dstReg = GetNextTempRegisterMd();
+        auto src1Reg = GetNextTempRegisterMd();
+        auto src2Reg = GetNextTempRegisterMd();
+        m_assembler.Vlwv(src1Reg, src1AddrReg, 0);
+        m_assembler.Vlwv(src2Reg, src2AddrReg, 0);
+        m_assembler.Vfdivvv(dstReg, src1Reg, src2Reg, 0);
+        m_assembler.Vswv(dstReg, dstAddrReg, 0);
+        //m_assembler.Break();
+        return;
+    }
 
     auto tmpReg = GetNextTempRegister();
     auto dstReg = GetNextTempRegisterMd();
@@ -1662,27 +1715,27 @@ CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_mdConstMatchersMem[] =
 CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_mdConstMatchersMemRVV[] =
 {
     { OP_MD_ADD_B, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_ADDB_MEMRVV> },
-    { OP_MD_ADD_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_ADDH_MEM> },
-    { OP_MD_ADD_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_ADDW_MEM> },
+    { OP_MD_ADD_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_ADDH_MEMRVV> },
+    { OP_MD_ADD_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_ADDW_MEMRVV> },
 
-    { OP_MD_SUB_B, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_SUBB_MEM> },
-    { OP_MD_SUB_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_SUBH_MEM> },
-    { OP_MD_SUB_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_SUBW_MEM> },
+    { OP_MD_SUB_B, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_SUBB_MEMRVV> },
+    { OP_MD_SUB_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_SUBH_MEMRVV> },
+    { OP_MD_SUB_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_SUBW_MEMRVV> },
 
-    { OP_MD_ADDUS_B, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_ADDBUS_MEM> },
-    { OP_MD_ADDUS_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_ADDHUS_MEM> },
-    { OP_MD_ADDUS_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_ADDWUS_MEM> },
+    { OP_MD_ADDUS_B, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_ADDBUS_MEMRVV> },
+    { OP_MD_ADDUS_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_ADDHUS_MEMRVV> },
+    { OP_MD_ADDUS_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_ADDWUS_MEMRVV> },
 
-    { OP_MD_ADDSS_B, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_ADDBSS_MEM> },
-    { OP_MD_ADDSS_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_ADDHSS_MEM> },
-    { OP_MD_ADDSS_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_ADDWSS_MEM> },
+    { OP_MD_ADDSS_B, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_ADDBSS_MEMRVV> },
+    { OP_MD_ADDSS_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_ADDHSS_MEMRVV> },
+    { OP_MD_ADDSS_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_ADDWSS_MEMRVV> },
 
-    { OP_MD_SUBUS_B, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_SUBBUS_MEM> },
-    { OP_MD_SUBUS_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_SUBHUS_MEM> },
-    { OP_MD_SUBUS_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_SUBWUS_MEM> },
+    { OP_MD_SUBUS_B, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_SUBBUS_MEMRVV> },
+    { OP_MD_SUBUS_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_SUBHUS_MEMRVV> },
+    { OP_MD_SUBUS_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_SUBWUS_MEMRVV> },
 
-    { OP_MD_SUBSS_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_SUBHSS_MEM> },
-    { OP_MD_SUBSS_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_SUBWSS_MEM> },
+    { OP_MD_SUBSS_H, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_SUBHSS_MEMRVV> },
+    { OP_MD_SUBSS_W, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_SUBWSS_MEMRVV> },
 
     { OP_MD_CLAMP_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL,       MATCH_NIL, &CCodeGen_RV64::Emit_Md_ClampS_MemMem },
 
@@ -1706,10 +1759,10 @@ CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_mdConstMatchersMemRVV[] =
 	{ OP_MD_MUL_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_MULS_MEMRVV> },
     { OP_MD_DIV_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_DivS_MemMemMem       },
 
-    { OP_MD_ABS_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL,       MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMem1S<MDOP_ABSS_1S>      },
+    { OP_MD_ABS_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL,       MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemRVV<MDOP_ABSS_MEMRVV>      },
 
-    { OP_MD_MIN_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem1S<MDOP_MINS_1S> },
-    { OP_MD_MAX_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem1S<MDOP_MAXS_1S> },
+    { OP_MD_MIN_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_MINS_MEMRVV> },
+    { OP_MD_MAX_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_MAXS_MEMRVV> },
 
     { OP_MD_CMPLT_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemIR1S<MDOP_CMPLTS_1S> },
     { OP_MD_CMPGT_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRevIR1S<MDOP_CMPLTS_1S>    },
@@ -2350,7 +2403,7 @@ void CCodeGen_RV64::Emit_Md_Srl256_VarMemVar(const STATEMENT& statement)
 
 CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_mdConstMatchersRVV[] =
 {
-#if 0
+#if 1
     { OP_MD_ADD_B,              MATCH_VARIABLE128,    MATCH_VARIABLE128,    MATCH_VARIABLE128,      MATCH_NIL, &CCodeGen_RV64::Emit_Md_VarVarVar<MDOP_ADDB>                  },
     { OP_MD_ADD_H,              MATCH_VARIABLE128,    MATCH_VARIABLE128,    MATCH_VARIABLE128,      MATCH_NIL, &CCodeGen_RV64::Emit_Md_VarVarVar<MDOP_ADDH>                  },
     { OP_MD_ADD_W,              MATCH_VARIABLE128,    MATCH_VARIABLE128,    MATCH_VARIABLE128,      MATCH_NIL, &CCodeGen_RV64::Emit_Md_VarVarVar<MDOP_ADDW>                  },

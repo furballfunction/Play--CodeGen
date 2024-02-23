@@ -567,6 +567,11 @@ void CRV64Assembler::Clamp_ui8(REGISTER32 tmp1Reg, REGISTER32 tmp2Reg) {
 
 void CRV64Assembler::Add_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vaddvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4EA08400;
     opcode |= (rd <<  0);
@@ -816,6 +821,11 @@ void CRV64Assembler::Sqadd_16b_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg
 
 void CRV64Assembler::Add_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vaddvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4E608400;
     opcode |= (rd <<  0);
@@ -841,6 +851,11 @@ void CRV64Assembler::Add_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::And_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vandvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4E201C00;
     opcode |= (rd <<  0);
@@ -1440,6 +1455,11 @@ void CRV64Assembler::Fabs_1s(REGISTERMD rd, REGISTERMD rn)
 
 void CRV64Assembler::Fabs_4s(REGISTERMD rd, REGISTERMD rn)
 {
+    if (m_thead_extentions) {
+        Vfsgnjxvv(rd, rn, rn, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4EA0F800;
     opcode |= (rd <<  0);
@@ -1608,6 +1628,11 @@ void CRV64Assembler::Fdiv_1s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Fdiv_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vfdivvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6E20FC00;
     opcode |= (rd <<  0);
@@ -1733,6 +1758,11 @@ void CRV64Assembler::Fmax_1s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Fmax_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vfmaxvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4E20F400;
     opcode |= (rd <<  0);
@@ -1775,6 +1805,11 @@ void CRV64Assembler::Fmin_1s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Fmin_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vfminvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4EA0F400;
     opcode |= (rd <<  0);
@@ -2976,6 +3011,11 @@ void CRV64Assembler::Sshr_8h(REGISTERMD rd, REGISTERMD rn, uint8 sa)
 
 void CRV64Assembler::Sqadd_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vsaddvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4EA00C00;
     opcode |= (rd  <<  0);
@@ -2986,6 +3026,11 @@ void CRV64Assembler::Sqadd_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Sqadd_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vsaddvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4E600C00;
     opcode |= (rd  <<  0);
@@ -2996,6 +3041,11 @@ void CRV64Assembler::Sqadd_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Sqadd_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vsaddvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4E200C00;
     opcode |= (rd <<  0);
@@ -3006,6 +3056,11 @@ void CRV64Assembler::Sqadd_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Sqsub_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vssubvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4EA02C00;
     opcode |= (rd  <<  0);
@@ -3016,6 +3071,11 @@ void CRV64Assembler::Sqsub_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Sqsub_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vssubvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4E602C00;
     opcode |= (rd  <<  0);
@@ -3487,6 +3547,11 @@ void CRV64Assembler::Uqsub_16b_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg
 
 void CRV64Assembler::Sub_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vsubvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6EA08400;
     opcode |= (rd  <<  0);
@@ -3497,6 +3562,11 @@ void CRV64Assembler::Sub_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Sub_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vsubvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6E608400;
     opcode |= (rd  <<  0);
@@ -3507,6 +3577,11 @@ void CRV64Assembler::Sub_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Sub_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vsubvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6E208400;
     opcode |= (rd  <<  0);
@@ -3641,6 +3716,11 @@ void CRV64Assembler::Umull(REGISTER64 rd, REGISTER32 rn, REGISTER32 rm, REGISTER
 
 void CRV64Assembler::Uqadd_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vsadduvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6EA00C00;
     opcode |= (rd  <<  0);
@@ -3651,6 +3731,11 @@ void CRV64Assembler::Uqadd_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Uqadd_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vsadduvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6E600C00;
     opcode |= (rd  <<  0);
@@ -3661,6 +3746,11 @@ void CRV64Assembler::Uqadd_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Uqadd_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vsadduvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6E200C00;
     opcode |= (rd  <<  0);
@@ -3671,6 +3761,11 @@ void CRV64Assembler::Uqadd_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Uqsub_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vssubuvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6EA02C00;
     opcode |= (rd  <<  0);
@@ -3681,6 +3776,11 @@ void CRV64Assembler::Uqsub_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Uqsub_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vssubuvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6E602C00;
     opcode |= (rd  <<  0);
@@ -3691,6 +3791,11 @@ void CRV64Assembler::Uqsub_8h(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Uqsub_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vssubuvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6E202C00;
     opcode |= (rd  <<  0);
@@ -4964,5 +5069,45 @@ void CRV64Assembler::Vaddvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm) {
     opcode |= (vd << 7);
     opcode |= ((imm & 0x1F) << 15);
     opcode |= (vs2 << 20);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vfsgnjxvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x2a001057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vdivvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x86002057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vfdivvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x82001057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vfminvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x12001057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vfmaxvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm) {
+    uint32 opcode = 0x1a001057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    opcode |= (vs1 << 15);
     WriteWord(opcode);
 }
