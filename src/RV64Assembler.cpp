@@ -1530,6 +1530,12 @@ void CRV64Assembler::Fcmge_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 }
 
 
+void CRV64Assembler::Fcmlt_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
+{
+    assert(m_thead_extentions);
+    Vmfltvv(rd, rn, rm, 0);
+}
+
 void CRV64Assembler::Fcmlt_1s(REGISTER32 rd, REGISTERMD rn, REGISTERMD rm)
 {
     // flt.s
@@ -1542,6 +1548,10 @@ void CRV64Assembler::Fcmlt_1s(REGISTER32 rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Fcmgt_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    assert(m_thead_extentions);
+    Vmfltvv(rd, rm, rn, 0);
+    return;
+
     assert(0);
     uint32 opcode = 0x6EA0E400;
     opcode |= (rd <<  0);
@@ -2600,6 +2610,19 @@ void CRV64Assembler::Scvtf_1s(REGISTERMD rd, REGISTERMD rn)
     opcode |= (rn << 15);
     WriteWord(opcode);
     WriteWord(0xffffffff);
+}
+
+void CRV64Assembler::Vfcvtfxv_4s(REGISTERMD rd, REGISTERMD rn)
+{
+    assert(m_thead_extentions);
+    Vfcvtfxv(rd, rn, 0);
+}
+
+void CRV64Assembler::Vfcvtxfv_4s(REGISTERMD rd, REGISTERMD rn)
+{
+    assert(m_thead_extentions);
+    Fsrmi(x0, 1);
+    Vfcvtxfv(rd, rn, 0);
 }
 
 void CRV64Assembler::Fcvtsw_1s(REGISTERMD rd, REGISTER32 rn)
@@ -5109,5 +5132,26 @@ void CRV64Assembler::Vfmaxvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int 
     opcode |= (vd << 7);
     opcode |= (vs2 << 20);
     opcode |= (vs1 << 15);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vfcvtxfv(REGISTERMD vd, REGISTERMD vs2, int vm) {
+    uint32 opcode = 0x8a009057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Vfcvtfxv(REGISTERMD vd, REGISTERMD vs2, int vm) {
+    uint32 opcode = 0x8a019057;
+    opcode |= (vd << 7);
+    opcode |= (vs2 << 20);
+    WriteWord(opcode);
+}
+
+void CRV64Assembler::Fsrmi(REGISTER64 rd, uint16 uimm) {
+    uint32 opcode = 0x00205073;
+    opcode |= (rd << 7);
+    opcode |= (uimm << 15);
     WriteWord(opcode);
 }

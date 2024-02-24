@@ -186,6 +186,7 @@ public:
     void    Fcmge_4s(REGISTERMD, REGISTERMD, REGISTERMD);
     void    Fcmgt_4s(REGISTERMD, REGISTERMD, REGISTERMD);
 
+    void    Fcmlt_4s(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm);
     void    Fcmlt_1s(REGISTER32, REGISTERMD, REGISTERMD);
 
     void    Fcmltz_4s(REGISTERMD, REGISTERMD);
@@ -258,6 +259,10 @@ public:
     void    Orr_16b_Mem(REGISTER64, REGISTER64, REGISTER64, REGISTER32, REGISTER32);
 
     void    Ret(REGISTER64 = xRA);
+
+    void    Vfcvtfxv_4s(REGISTERMD rd, REGISTERMD rn);
+    void    Vfcvtxfv_4s(REGISTERMD rd, REGISTERMD rn);
+
     void    Scvtf_1s(REGISTERMD, REGISTERMD);
     void    Fcvtsw_1s(REGISTERMD rd, REGISTER32 rn);
     void    Scvtf_4s(REGISTERMD, REGISTERMD);
@@ -427,6 +432,10 @@ public:
     void    Vfdivvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vfminvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vfmaxvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vfcvtxfv(REGISTERMD vd, REGISTERMD vs2, int vm=0);
+    void    Vfcvtfxv(REGISTERMD vd, REGISTERMD vs2, int vm=0);
+
+    void    Fsrmi(REGISTER64 rd, uint16 uimm);
 
     void    Lwu(REGISTER32 rd, REGISTER64 rs1, int32 imm);
     void    Lw(REGISTER32 rd, REGISTER64 rs1, int32 imm);
