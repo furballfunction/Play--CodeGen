@@ -402,6 +402,8 @@ public:
     void    Vminuvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
     void    Vaddvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vsubvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vrsubvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
+    void    Vrsubvi(REGISTERMD vd, REGISTERMD vs2, int imm, int vm);
     void    Vssubuvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vssubvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vsadduvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
@@ -439,6 +441,7 @@ public:
 
     void    Lwu(REGISTER32 rd, REGISTER64 rs1, int32 imm);
     void    Lw(REGISTER32 rd, REGISTER64 rs1, int32 imm);
+    void    Sw(REGISTER64 rs1, REGISTER32 rs2, int32 imm);
     void    Xorw(REGISTER32 rd, REGISTER32 rs1, REGISTER32 rs2);
     void    Orw(REGISTER32 rd, REGISTER32 rs1, REGISTER32 rs2);
     void    Andw(REGISTER32 rd, REGISTER32 rs1, REGISTER32 rs2);
