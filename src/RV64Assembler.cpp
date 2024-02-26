@@ -1469,6 +1469,11 @@ void CRV64Assembler::Dup_4s(REGISTERMD rd, REGISTER32 rn)
 
 void CRV64Assembler::Eor_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vxorvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6E201C00;
     opcode |= (rd <<  0);
@@ -2574,6 +2579,11 @@ void CRV64Assembler::Mvn(REGISTER32 rd, REGISTER32 rm)
 
 void CRV64Assembler::Mvn_16b(REGISTERMD rd, REGISTERMD rn)
 {
+    if (m_thead_extentions) {
+        Vxorvi(rd, rn, -1, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x6E205800;
     opcode |= (rd <<  0);
@@ -2611,6 +2621,11 @@ void CRV64Assembler::Orn_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 
 void CRV64Assembler::Orr_16b(REGISTERMD rd, REGISTERMD rn, REGISTERMD rm)
 {
+    if (m_thead_extentions) {
+        Vorvv(rd, rn, rm, 0);
+        return;
+    }
+
     assert(0);
     uint32 opcode = 0x4EA01C00;
     opcode |= (rd <<  0);
@@ -2761,6 +2776,12 @@ void CRV64Assembler::Shl_8h_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, u
 
 void CRV64Assembler::Shl_4s(REGISTERMD rd, REGISTERMD rn, uint8 sa)
 {
+    if (m_thead_extentions) {
+        //assert((sa & 0x1f) == sa);
+        Vsllvi(rd, rn, sa & 0x1f, 0);
+        return;
+    }
+
     assert(0);
     uint8 immhb = (sa & 0x1F) + 32;
     uint32 opcode = 0x4F005400;
@@ -2772,6 +2793,12 @@ void CRV64Assembler::Shl_4s(REGISTERMD rd, REGISTERMD rn, uint8 sa)
 
 void CRV64Assembler::Shl_8h(REGISTERMD rd, REGISTERMD rn, uint8 sa)
 {
+    if (m_thead_extentions) {
+        //assert((sa & 0x1f) == sa);
+        Vsllvi(rd, rn, sa & 0x1f, 0);
+        return;
+    }
+
     assert(0);
     uint8 immhb = (sa & 0xF) + 16;
     uint32 opcode = 0x4F005400;
@@ -3092,6 +3119,11 @@ void CRV64Assembler::Sshr_8h_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, 
 
 void CRV64Assembler::Sshr_4s(REGISTERMD rd, REGISTERMD rn, uint8 sa)
 {
+    if (m_thead_extentions) {
+        Vsravi(rd, rn, sa & 0x1f, 0);
+        return;
+    }
+
     assert(0);
     uint8 immhb = (32 * 2) - (sa & 0x1F);
     uint32 opcode = 0x4F000400;
@@ -3103,6 +3135,11 @@ void CRV64Assembler::Sshr_4s(REGISTERMD rd, REGISTERMD rn, uint8 sa)
 
 void CRV64Assembler::Sshr_8h(REGISTERMD rd, REGISTERMD rn, uint8 sa)
 {
+    if (m_thead_extentions) {
+        Vsravi(rd, rn, sa & 0x1f, 0);
+        return;
+    }
+
     assert(0);
     uint8 immhb = (16 * 2) - (sa & 0xF);
     uint32 opcode = 0x4F000400;
@@ -3946,6 +3983,11 @@ void CRV64Assembler::Ushr_8h_Mem(REGISTER64 dstAddrReg, REGISTER64 src1AddrReg, 
 
 void CRV64Assembler::Ushr_4s(REGISTERMD rd, REGISTERMD rn, uint8 sa)
 {
+    if (m_thead_extentions) {
+        Vsrlvi(rd, rn, sa & 0x1f, 0);
+        return;
+    }
+
     assert(0);
     uint8 immhb = (32 * 2) - (sa & 0x1F);
     uint32 opcode = 0x6F000400;
@@ -3957,6 +3999,11 @@ void CRV64Assembler::Ushr_4s(REGISTERMD rd, REGISTERMD rn, uint8 sa)
 
 void CRV64Assembler::Ushr_8h(REGISTERMD rd, REGISTERMD rn, uint8 sa)
 {
+    if (m_thead_extentions) {
+        Vsrlvi(rd, rn, sa & 0x1f, 0);
+        return;
+    }
+
     assert(0);
     uint8 immhb = (16 * 2) - (sa & 0xF);
     uint32 opcode = 0x6F000400;

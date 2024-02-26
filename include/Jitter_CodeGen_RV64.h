@@ -361,6 +361,11 @@ namespace Jitter
             typedef void (CRV64Assembler::*OpRegType)(CRV64Assembler::REGISTERMD, CRV64Assembler::REGISTERMD, uint8);
         };
 
+        struct MDOP_SHIFT_MEMRVV
+        {
+            typedef void (CRV64Assembler::*OpRegType)(CRV64Assembler::REGISTERMD, CRV64Assembler::REGISTERMD, uint8);
+        };
+
         struct MDOP_SHIFT_MEM
         {
             typedef void (CRV64Assembler::*OpRegType)(CRV64Assembler::REGISTER64, CRV64Assembler::REGISTER64, uint8, CRV64Assembler::REGISTER32);
@@ -855,6 +860,12 @@ namespace Jitter
             static OpRegType OpReg() { return &CRV64Assembler::Fmul_4s; }
         };
 
+        struct MDOP_DIVS_MEMRVV : public MDOP_BASE3_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Fdiv_4s; }
+        };
+
         struct MDOP_ADDS : public MDOP_BASE3
         {
             static OpRegType OpReg() { return &CRV64Assembler::Fadd_4s; }
@@ -997,6 +1008,30 @@ namespace Jitter
             static OpRegType OpReg() { return &CRV64Assembler::Mvn_16b_Mem; }
         };
 
+        struct MDOP_AND_MEMRVV : public MDOP_BASE3_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::And_16b; }
+        };
+
+        struct MDOP_OR_MEMRVV : public MDOP_BASE3_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Orr_16b; }
+        };
+
+        struct MDOP_XOR_MEMRVV : public MDOP_BASE3_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Eor_16b; }
+        };
+
+        struct MDOP_NOT_MEMRVV : public MDOP_BASE2_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Mvn_16b; }
+        };
+
         struct MDOP_AND : public MDOP_BASE3
         {
             static OpRegType OpReg() { return &CRV64Assembler::And_16b; }
@@ -1085,6 +1120,42 @@ namespace Jitter
         struct MDOP_SRAW_MEM : public MDOP_SHIFT_MEM
         {
             static OpRegType OpReg() { return &CRV64Assembler::Sshr_4s_Mem; }
+        };
+
+        struct MDOP_SLLH_MEMRVV : public MDOP_SHIFT_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Shl_8h; }
+        };
+
+        struct MDOP_SLLW_MEMRVV : public MDOP_SHIFT_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Shl_4s; }
+        };
+
+        struct MDOP_SRLH_MEMRVV : public MDOP_SHIFT_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Ushr_8h; }
+        };
+
+        struct MDOP_SRLW_MEMRVV : public MDOP_SHIFT_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Ushr_4s; }
+        };
+
+        struct MDOP_SRAH_MEMRVV : public MDOP_SHIFT_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Sshr_8h; }
+        };
+
+        struct MDOP_SRAW_MEMRVV : public MDOP_SHIFT_MEMRVV
+        {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Sshr_4s; }
         };
 
         struct MDOP_SLLH : public MDOP_SHIFT
@@ -1309,6 +1380,7 @@ namespace Jitter
         template <typename> void				Emit_Md_MemMemMemRevIR1S(const STATEMENT&);
         template <typename> void				Emit_Md_MemMemMemRev(const STATEMENT&);
         template <typename> void				Emit_Md_Shift_MemMemCst(const STATEMENT&);
+        template <typename> void				Emit_Md_Shift_MemMemCstRVV(const STATEMENT&);
 
         void									Emit_Md_Mov_MemMem(const STATEMENT&);
         void									Emit_Md_DivS_MemMemMem(const STATEMENT&);

@@ -506,6 +506,48 @@ void CCodeGen_RV64::Emit_Md_Shift_MemMemCst(const STATEMENT& statement)
     ((m_assembler).*(MDSHIFTOP::OpReg()))(dstAddrReg, src1AddrReg, src2->m_valueLow, tmp1Reg);
 }
 
+template <typename MDSHIFTOP>
+void CCodeGen_RV64::Emit_Md_Shift_MemMemCstRVV(const STATEMENT& statement)
+{
+    auto dst = statement.dst->GetSymbol().get();
+    auto src1 = statement.src1->GetSymbol().get();
+    auto src2 = statement.src2->GetSymbol().get();
+
+    //auto dstAddrReg = CRV64Assembler::r0;
+    //auto src1AddrReg = CRV64Assembler::r1;
+    //auto dstReg = CRV64Assembler::q0;
+    //auto src1Reg = CRV64Assembler::q1;
+
+    auto dstAddrReg = CRV64Assembler::x10;
+    auto src1AddrReg = CRV64Assembler::x11;
+    auto dstReg = GetNextTempRegisterMd();
+    auto src1Reg = GetNextTempRegisterMd();
+
+    LoadMemory128AddressInRegister(dstAddrReg, dst);
+    LoadMemory128AddressInRegister(src1AddrReg, src1);
+
+    //m_assembler.Vld1_32x4(src1Reg, src1AddrReg);
+    //((m_assembler).*(MDSHIFTOP::OpReg()))(dstReg, src1Reg, src2->m_valueLow);
+    //m_assembler.Vst1_32x4(dstReg, dstAddrReg);
+
+    uint32 width = MDSHIFTOP::Config.m_width;
+    uint32 lumop_rs2_vs2 = 0;
+    uint32 sumop_rs2_vs2 = 0;
+    uint32 vm = 1; // unmasked
+    uint32 lmop = 4; // sign-extended unit-stride
+    uint32 smop = 0; // unit-stride
+    uint32 nf = 0;
+
+    auto tmp1Reg = GetNextTempRegister();
+    m_assembler.Addiw(tmp1Reg, CRV64Assembler::zero, MDSHIFTOP::Config.m_vl);
+    m_assembler.Vsetvli(CRV64Assembler::xZR, static_cast<CRV64Assembler::REGISTER64>(tmp1Reg), (MDSHIFTOP::Config.m_sew<<2));
+    m_assembler.Vloadv(src1Reg, src1AddrReg, width, lumop_rs2_vs2, vm, lmop, nf);
+    ((m_assembler).*(MDSHIFTOP::OpReg()))(dstReg, src1Reg, src2->m_valueLow);
+    m_assembler.Vstorev(dstReg, dstAddrReg, width, sumop_rs2_vs2, vm, smop, nf);
+
+    //((m_assembler).*(MDSHIFTOP::OpReg()))(dstAddrReg, src1AddrReg, src2->m_valueLow, tmp1Reg);
+}
+
 void CCodeGen_RV64::Emit_Md_Mov_MemMem(const STATEMENT& statement)
 {
     auto dst = statement.dst->GetSymbol().get();
@@ -1757,7 +1799,7 @@ CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_mdConstMatchersMemRVV[] =
     { OP_MD_ADD_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_ADDS_MEMRVV> },
     { OP_MD_SUB_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_SUBS_MEMRVV> },
 	{ OP_MD_MUL_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_MULS_MEMRVV> },
-    { OP_MD_DIV_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_DivS_MemMemMem       },
+    { OP_MD_DIV_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_DIVS_MEMRVV> },
 
     { OP_MD_ABS_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL,       MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemRVV<MDOP_ABSS_MEMRVV>      },
 
@@ -1767,19 +1809,19 @@ CCodeGen_RV64::CONSTMATCHER CCodeGen_RV64::g_mdConstMatchersMemRVV[] =
     { OP_MD_CMPLT_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_CMPLTS_MEMRVV> },
     { OP_MD_CMPGT_S, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_CMPLTS_REV_MEMRVV>    },
 
-    { OP_MD_AND, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_AND_MEM> },
-    { OP_MD_OR,  MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_OR_MEM>  },
-    { OP_MD_XOR, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMem<MDOP_XOR_MEM> },
-    { OP_MD_NOT, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL,       MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMem<MDOP_NOT_MEM>    },
+    { OP_MD_AND, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_AND_MEMRVV> },
+    { OP_MD_OR,  MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_OR_MEMRVV>  },
+    { OP_MD_XOR, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemMemRVV<MDOP_XOR_MEMRVV> },
+    { OP_MD_NOT, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_NIL,       MATCH_NIL, &CCodeGen_RV64::Emit_Md_MemMemRVV<MDOP_NOT_MEMRVV>    },
 
-    { OP_MD_SLLH, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCst<MDOP_SLLH_MEM> },
-    { OP_MD_SLLW, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCst<MDOP_SLLW_MEM> },
+    { OP_MD_SLLH, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCstRVV<MDOP_SLLH_MEMRVV> },
+    { OP_MD_SLLW, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCstRVV<MDOP_SLLW_MEMRVV> },
 
-    { OP_MD_SRLH, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCst<MDOP_SRLH_MEM> },
-    { OP_MD_SRLW, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCst<MDOP_SRLW_MEM> },
+    { OP_MD_SRLH, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCstRVV<MDOP_SRLH_MEMRVV> },
+    { OP_MD_SRLW, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCstRVV<MDOP_SRLW_MEMRVV> },
 
-    { OP_MD_SRAH, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCst<MDOP_SRAH_MEM> },
-    { OP_MD_SRAW, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCst<MDOP_SRAW_MEM> },
+    { OP_MD_SRAH, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCstRVV<MDOP_SRAH_MEMRVV> },
+    { OP_MD_SRAW, MATCH_MEMORY128, MATCH_MEMORY128, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Shift_MemMemCstRVV<MDOP_SRAW_MEMRVV> },
 
     { OP_MD_SRL256, MATCH_VARIABLE128, MATCH_MEMORY256, MATCH_VARIABLE, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Srl256_MemMemVar },
     { OP_MD_SRL256, MATCH_VARIABLE128, MATCH_MEMORY256, MATCH_CONSTANT, MATCH_NIL, &CCodeGen_RV64::Emit_Md_Srl256_MemMemCst },
