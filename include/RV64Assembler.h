@@ -391,6 +391,8 @@ public:
     void    Vsbv(REGISTERMD vs3, REGISTER64 rs1, int vm);
     void    Vflwv(REGISTERMD vd, REGISTER64 rs1, int vm);
     void    Vfswv(REGISTERMD vs3, REGISTER64 rs1, int vm);
+    void    Vlev(REGISTERMD vd, REGISTER64 rs1, int vm);
+    void    Vsev(REGISTERMD vs3, REGISTER64 rs1, int vm);
     void    Vsetvli(REGISTER64 rd, REGISTER64 rs1, int vtypei);
     void    Vsetvli(REGISTER64 rd, REGISTER64 rs1, int vtypei, int count);
     void    Vextxv(REGISTER64 rd, REGISTERMD vs1, REGISTER64 rs1);
@@ -408,14 +410,18 @@ public:
     void    Vssubvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vsadduvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vsaddvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vsllvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
     void    Vsllvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
+    void    Vsrlvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
     void    Vsrlvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
+    void    Vsrlvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vsravi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
     void    Vmseqvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vmsltvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vmulhuvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vmulvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vandvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vandvi(REGISTERMD vd, REGISTERMD vs2, int imm, int vm);
     void    Vxorvi(REGISTERMD vd, REGISTERMD vs2, int16 imm, int vm);
     void    Vxorvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vorvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
@@ -436,6 +442,14 @@ public:
     void    Vfmaxvv(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
     void    Vfcvtxfv(REGISTERMD vd, REGISTERMD vs2, int vm=0);
     void    Vfcvtfxv(REGISTERMD vd, REGISTERMD vs2, int vm=0);
+    void    Vslide1upvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
+    void    Vslide1downvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
+    void    Vmvvi(REGISTERMD vd, int imm, int vm);
+    void    Vmvvv(REGISTERMD vd, REGISTERMD vs1, int vm);
+    void    Vmvvx(REGISTERMD vd, REGISTER64 rs1, int vm);
+    void    Vmergevvm(REGISTERMD vd, REGISTERMD vs2, REGISTERMD vs1, int vm);
+    void    Vwaddvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
+    void    Vwadduvx(REGISTERMD vd, REGISTERMD vs2, REGISTER64 rs1, int vm);
 
     void    Fsrmi(REGISTER64 rd, uint16 uimm);
 

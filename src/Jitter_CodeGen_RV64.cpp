@@ -443,7 +443,7 @@ CCodeGen_RV64::CCodeGen_RV64()
     // Only MD Mem is supported
     if (m_thead_extentions) {
         //copyMatchers(g_mdConstMatchersRVV);
-        copyMatchers(g_mdConstMatchersMemRVV);
+        copyMatchers(g_mdConstMatchersRVV);
     } else {
         copyMatchers(g_mdConstMatchersMem);
     }

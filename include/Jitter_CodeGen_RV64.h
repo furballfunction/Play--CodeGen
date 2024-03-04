@@ -392,16 +392,19 @@ namespace Jitter
 
         struct MDOP_ADDB : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Add_16b; }
         };
 
         struct MDOP_ADDH : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Add_8h; }
         };
 
         struct MDOP_ADDW : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Add_4s; }
         };
 
@@ -422,31 +425,37 @@ namespace Jitter
 
         struct MDOP_ADDBUS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Uqadd_16b; }
         };
 
         struct MDOP_ADDHUS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Uqadd_8h; }
         };
 
         struct MDOP_ADDWUS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Uqadd_4s; }
         };
 
         struct MDOP_ADDBSS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Sqadd_16b; }
         };
 
         struct MDOP_ADDHSS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Sqadd_8h; }
         };
 
         struct MDOP_ADDWSS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Sqadd_4s; }
         };
 
@@ -624,41 +633,49 @@ namespace Jitter
 
         struct MDOP_SUBB : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Sub_16b; }
         };
 
         struct MDOP_SUBH : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Sub_8h; }
         };
 
         struct MDOP_SUBW : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Sub_4s; }
         };
 
         struct MDOP_SUBBUS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Uqsub_16b; }
         };
 
         struct MDOP_SUBHUS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Uqsub_8h; }
         };
 
         struct MDOP_SUBWUS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Uqsub_4s; }
         };
 
         struct MDOP_SUBHSS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Sqsub_8h; }
         };
 
         struct MDOP_SUBWSS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Sqsub_4s; }
         };
 
@@ -730,41 +747,49 @@ namespace Jitter
 
         struct MDOP_CMPEQB : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Cmeq_16b; }
         };
 
         struct MDOP_CMPEQH : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Cmeq_8h; }
         };
 
         struct MDOP_CMPEQW : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Cmeq_4s; }
         };
 
         struct MDOP_CMPGTB : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Cmgt_16b; }
         };
 
         struct MDOP_CMPGTH : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Cmgt_8h; }
         };
 
         struct MDOP_CMPGTW : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Cmgt_4s; }
         };
 
         struct MDOP_MINH : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Smin_8h; }
         };
 
         struct MDOP_MINW : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Smin_4s; }
         };
 
@@ -792,11 +817,13 @@ namespace Jitter
 
         struct MDOP_MAXH : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Smax_8h; }
         };
 
         struct MDOP_MAXW : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Smax_4s; }
         };
 
@@ -868,21 +895,25 @@ namespace Jitter
 
         struct MDOP_ADDS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Fadd_4s; }
         };
 
         struct MDOP_SUBS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Fsub_4s; }
         };
 
         struct MDOP_MULS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Fmul_4s; }
         };
 
         struct MDOP_DIVS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Fdiv_4s; }
         };
 
@@ -921,16 +952,19 @@ namespace Jitter
 
         struct MDOP_ABSS : public MDOP_BASE2
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Fabs_4s; }
         };
 
         struct MDOP_MINS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Fmin_4s; }
         };
 
         struct MDOP_MAXS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Fmax_4s; }
         };
 
@@ -953,6 +987,7 @@ namespace Jitter
 
         struct MDOP_CMPGTS : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Fcmgt_4s; }
         };
 
@@ -980,12 +1015,18 @@ namespace Jitter
 
         struct MDOP_TOSINGLE : public MDOP_BASE2
         {
-            static OpRegType OpReg() { return &CRV64Assembler::Scvtf_4s; }
+            /*static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Scvtf_4s; }*/
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Vfcvtfxv_4s; }
         };
 
         struct MDOP_TOWORD : public MDOP_BASE2
         {
-            static OpRegType OpReg() { return &CRV64Assembler::Fcvtzs_4s; }
+            /*static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Fcvtzs_4s; }*/
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
+            static OpRegType OpReg() { return &CRV64Assembler::Vfcvtxfv_4s; }
         };
 
         struct MDOP_AND_MEM : public MDOP_BASE3_MEM
@@ -1034,51 +1075,61 @@ namespace Jitter
 
         struct MDOP_AND : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::And_16b; }
         };
 
         struct MDOP_OR : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Orr_16b; }
         };
 
         struct MDOP_XOR : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Eor_16b; }
         };
 
         struct MDOP_NOT : public MDOP_BASE2
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Mvn_16b; }
         };
 
         struct MDOP_UNPACK_LOWER_BH : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Zip1_16b; }
         };
 
         struct MDOP_UNPACK_LOWER_HW : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Zip1_8h; }
         };
 
         struct MDOP_UNPACK_LOWER_WD : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Zip1_4s; }
         };
 
         struct MDOP_UNPACK_UPPER_BH : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e8_16_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Zip2_16b; }
         };
 
         struct MDOP_UNPACK_UPPER_HW : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Zip2_8h; }
         };
 
         struct MDOP_UNPACK_UPPER_WD : public MDOP_BASE3
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Zip2_4s; }
         };
 
@@ -1160,31 +1211,37 @@ namespace Jitter
 
         struct MDOP_SLLH : public MDOP_SHIFT
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Shl_8h; }
         };
 
         struct MDOP_SLLW : public MDOP_SHIFT
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Shl_4s; }
         };
 
         struct MDOP_SRLH : public MDOP_SHIFT
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Ushr_8h; }
         };
 
         struct MDOP_SRLW : public MDOP_SHIFT
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Ushr_4s; }
         };
 
         struct MDOP_SRAH : public MDOP_SHIFT
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e16_8_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Sshr_8h; }
         };
 
         struct MDOP_SRAW : public MDOP_SHIFT
         {
+            static constexpr CRV64Assembler::VConfig Config = CRV64Assembler::VConfig_e32_4_Vector;
             static OpRegType OpReg() { return &CRV64Assembler::Sshr_4s; }
         };
 
@@ -1360,6 +1417,13 @@ namespace Jitter
 
         void    Emit_Md_PackHB_VarVarVar(const STATEMENT&);
         void    Emit_Md_PackWH_VarVarVar(const STATEMENT&);
+
+        template <uint32> void					Emit_Md_UnpackBH_VarVarVar(const STATEMENT&);
+        template <uint32> void					Emit_Md_UnpackUpperBH_VarVarVar(const STATEMENT&);
+        template <uint32> void					Emit_Md_UnpackHW_VarVarVar(const STATEMENT&);
+        template <uint32> void					Emit_Md_UnpackUpperHW_VarVarVar(const STATEMENT&);
+        template <uint32> void					Emit_Md_UnpackWD_VarVarVar(const STATEMENT&);
+        template <uint32> void					Emit_Md_UnpackUpperWD_VarVarVar(const STATEMENT&);
 
         void    Emit_MergeTo256_MemVarVar(const STATEMENT&);
         void    Emit_Md_Srl256_VarMemVar(const STATEMENT&);
